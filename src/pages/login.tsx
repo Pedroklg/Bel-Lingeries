@@ -3,33 +3,38 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import { Container, Typography, TextField, Button, CircularProgress, Box } from '@mui/material';
+import Link from 'next/link';
 
-interface LoginForm {
+interface AuthForm {
   email: string;
   password: string;
 }
 
 const LoginPage = () => {
   const router = useRouter();
-  const { handleSubmit, register, formState: { errors }, setError } = useForm<LoginForm>();
+  const { handleSubmit, register, formState: { errors }, setError } = useForm<AuthForm>();
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: AuthForm) => {
     setLoading(true);
-    const result = await signIn('credentials', {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    }) as { error?: string };
+    try {
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      }) as { error?: string };
 
-    if (result.error) {
+      if (result.error) {
+        setError('email', { type: 'manual', message: 'Invalid credentials' });
+      } else {
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
       setError('email', { type: 'manual', message: 'Invalid credentials' });
-      setError('password', { type: 'manual', message: 'Invalid credentials' });
-    } else {
-      router.push('/'); // Redirect to home page after successful login
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -73,17 +78,11 @@ const LoginPage = () => {
           >
             {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
-          {/* Google Sign-In Button */}
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={() => signIn('google')}
-            sx={{ mt: 1, mb: 2 }}
-            disabled={loading}
-          >
-            Sign in with Google
-          </Button>
+          <Link href="/register">
+            <Typography component="h1" variant="body1">
+              Não possui uma conta? Registre-se
+            </Typography>
+          </Link>
         </Box>
       </Box>
     </Container>

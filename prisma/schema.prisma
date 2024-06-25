@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
   name     String?
   password String
-  isAdmin  Boolean @default(false)
+  isAdmin  Boolean   @default(false)
   orders   Order[]
+  sessions Session[]
 }
 
 model Product {
@@ -78,4 +79,21 @@ model Collection {
   name     String
   image    String
   products Product[]
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }

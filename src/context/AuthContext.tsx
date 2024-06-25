@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 type User = {
@@ -23,8 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await axios.post('/api/auth/login', { email, password });
       const token = response.data.token;
-      localStorage.setItem('token', token); // Store token in localStorage for persistence
-      await loadUser(); // Load user details after successful login
+      localStorage.setItem('token', token);
+      await loadUser();
     } catch (error) {
       console.error('Login failed', error);
     }
@@ -49,6 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     setUser(null);
   };
+
+  // Load user on initial render if token exists
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      loadUser();
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loadUser }}>

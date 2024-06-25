@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import MenuIcon from '@mui/icons-material/Menu';
 import Avatar from '@mui/material/Avatar';
+import { useAuth } from '@/context/AuthContext';
 import { fetchProductsByCategory } from '@/services/itemsByCategory';
 import { Product } from '@/types/models';
 import { palette } from '../../theme';
@@ -24,6 +25,7 @@ const Header: React.FC = () => {
     const [biquinis, setBiquinis] = useState<Product[]>([]);
     const [cartAnchorEl, setCartAnchorEl] = useState<null | HTMLElement>(null);
     const { cartItems } = useCart();
+    const { user, logout } = useAuth(); // Access user state and logout function from AuthProvider
 
     useEffect(() => {
         const fetchData = async () => {
@@ -103,6 +105,17 @@ const Header: React.FC = () => {
                 </Link>
                 {/* Right Section - Cart and Menu */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {/* Conditional Rendering based on Authentication State */}
+                    {user ? (
+                        // User is logged in - Show Avatar
+                        <Avatar onClick={toggleMenu}>{user.email.charAt(0).toUpperCase()}</Avatar>
+                    ) : (
+                        // User is not logged in - Show Login and Register Buttons
+                        <>
+                            <Button color="inherit" component={Link} href="/login">Login</Button>
+                            <Button color="inherit" component={Link} href="/register">Register</Button>
+                        </>
+                    )}
                     {/* Cart Icon */}
                     <IconButton onClick={handleCartClick} sx={{ color: belPink }}>
                         <ShoppingBagIcon fontSize='large' />
