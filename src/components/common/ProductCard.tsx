@@ -43,7 +43,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             component="div"
-            sx={{ maxWidth: 300, margin: 'auto', marginBottom: 20, height: '25rem', width: '18rem' }}
+            sx={{ maxWidth: 300, margin: 'auto', height: '25rem', width: '18rem' }}
             className="rounded-lg overflow-hidden shadow-lg"
         >
             <CardMedia

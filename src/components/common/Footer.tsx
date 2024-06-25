@@ -8,7 +8,7 @@ const { belDarkCyan, belDarkBeige, belLightBeige } = palette;
 
 const Footer: React.FC = () => {
     return (
-        <AppBar position="relative" sx={{ backgroundColor: belDarkCyan, bottom: 0 }}>
+        <AppBar position="relative" sx={{ backgroundColor: belDarkCyan, bottom: 0, mt: '3rem' }}>
             <Toolbar>
                 <a href="https://www.instagram.com/bel.lingeriespg/" target="_blank" rel="noopener noreferrer" >
                     <IconButton sx={{ color: belLightBeige }}>

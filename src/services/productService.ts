@@ -5,28 +5,53 @@ import { mapApiProductVariantToModel } from '@/utils/ProductResponseProduct';
 
 const API_URL = '/api/products';
 
-export const fetchAllProducts = async (): Promise<ProductResponse[]> => {
-  const response = await axios.get<ProductResponse[]>(`${API_URL}?type=all`);
-  return response.data;
+export const fetchAllProducts = async (): Promise<Product[]> => {
+  try {
+    const response = await axios.get<Product[]>(`${API_URL}?type=all`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all products:', error);
+    throw error;
+  }
 };
 
-export const fetchProductById = async (id: number): Promise<ProductResponse> => {
-  const response = await axios.get<ProductResponse>(`${API_URL}/${id}`);
-  return response.data;
+export const fetchProductById = async (id: number): Promise<Product> => {
+  try { 
+    const response = await axios.get<ProductResponse>(`${API_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching product ${id}:`, error);
+    throw error;
+  }
 };
 
-export const createProduct = async (product: ProductResponse): Promise<ProductResponse> => {
-  const response = await axios.post<ProductResponse>(API_URL, product);
-  return response.data;
+export const createProduct = async (product: ProductResponse): Promise<Product> => {
+  try {
+    const response = await axios.post<Product>(API_URL, product);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating product:', error);
+    throw error;
+  }
 };
 
-export const updateProduct = async (id: number, product: ProductResponse): Promise<ProductResponse> => {
-  const response = await axios.put<ProductResponse>(`${API_URL}/${id}`, product);
-  return response.data;
+export const updateProduct = async (id: number, product: ProductResponse): Promise<Product> => {
+  try {
+    const response = await axios.put<Product>(`${API_URL}/${id}`, product);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating product ${id}:`, error);
+    throw error;
+  }
 };
 
 export const deleteProduct = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
+  try {
+    await axios.delete(`${API_URL}/${id}`);
+  } catch (error) {
+    console.error(`Error deleting product ${id}:`, error);
+    throw error;
+  }
 };
 
 export const fetchNewestProducts = async (limit: number): Promise<Product[]> => {

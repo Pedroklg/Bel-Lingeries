@@ -3,7 +3,7 @@ import { Product } from '@/types/models';
 
 export const fetchProductsByCategory = async (categoryId: number): Promise<Product[]> => {
     try {
-        const response = await axios(`/api/category/${categoryId}`);
+        const response = await axios(`/api/categories/${categoryId}`);
         if (response.status !== 200) {
             throw new Error(`Failed to fetch products for category ID ${categoryId}`);
         }
