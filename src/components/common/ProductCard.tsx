@@ -67,7 +67,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         {availableColors.map((color, index) => (
                             <div
                                 key={index}
-                                className="w-6 h-6 rounded-full border border-gray-300 cursor-pointer"
+                                className="w-6 h-6 rounded-full border cursor-pointer"
                                 style={{ backgroundColor: color }}
                                 onClick={() => handleColorClick(product.variants[index])}
                             ></div>

@@ -1,65 +1,64 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import axios from 'axios';
-
-type User = {
-  id: number;
-  email: string;
-  isAdmin: boolean;
-};
+import { Session } from 'next-auth';
 
 type AuthContextType = {
-  user: User | null;
+  user: Session | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loadUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const { data: session, status } = useSession();
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-      await loadUser();
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (result && !result?.error) {
+        console.log('Login successful');
+      } else {
+        throw new Error('Invalid credentials');
+      }
     } catch (error) {
       console.error('Login failed', error);
+      throw error;
     }
   };
 
   const loadUser = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await axios.get('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(response.data.user);
-      } catch (error) {
-        console.error('Failed to load user', error);
-        setUser(null);
-      }
+    try {
+      const response = await axios.get('/api/auth/me');
+      console.log('User loaded:', response.data.user);
+    } catch (error: any) {
+      console.error('Failed to load user:', error.response?.status, error.response?.data);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
 
-  // Load user on initial render if token exists
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    if (status === 'authenticated') {
       loadUser();
     }
-  }, []);
+  }, [status]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loadUser }}>
+    <AuthContext.Provider value={{ user: session, login, logout, loadUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -39,16 +39,19 @@ export default NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && token.id) {
         session.user = {
-          ...token,
-          id: token.id as string
-        } as { id: string, name?: string | null | undefined, email?: string | null | undefined, image?: string | null | undefined };
+          ...session.user,
+          id: token.id as string,
+          isAdmin: token.isAdmin
+        };
       }
+      console.log('Session:', session);
       return session;
     }
   },

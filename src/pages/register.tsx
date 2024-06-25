@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { Container, Typography, TextField, Button, CircularProgress, Box } from '@mui/material';
+import { palette } from '@/theme';
+
+const { belDarkCyan, belBlue, belWhite } = palette;
 
 interface RegisterForm {
   email: string;
@@ -45,9 +48,9 @@ const RegisterPage = () => {
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
-          Register
+      <Box sx={{ marginTop: "15rem", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h5" sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '3rem' }}>
+          Registrar
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
           <TextField
@@ -61,6 +64,7 @@ const RegisterPage = () => {
             {...register('email', { required: 'Email is required' })}
             error={!!errors.email}
             helperText={errors.email?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <TextField
             margin="normal"
@@ -73,6 +77,7 @@ const RegisterPage = () => {
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors.password?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <TextField
             margin="normal"
@@ -85,6 +90,7 @@ const RegisterPage = () => {
             {...register('confirmPassword', { required: 'Please confirm your password' })}
             error={!!errors.confirmPassword}
             helperText={errors.confirmPassword?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <TextField
             margin="normal"
@@ -96,12 +102,13 @@ const RegisterPage = () => {
             {...register('name', { required: 'Name is required' })}
             error={!!errors.name}
             helperText={errors.name?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3, mb: 2, bgcolor: belBlue, color: belDarkCyan, fontWeight: 'bold'}}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} /> : 'Register'}

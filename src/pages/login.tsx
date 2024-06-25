@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import { Container, Typography, TextField, Button, CircularProgress, Box } from '@mui/material';
 import Link from 'next/link';
+import { palette } from '@/theme';
+
+const { belWhite, belDarkCyan, belBlue } = palette;
 
 interface AuthForm {
   email: string;
@@ -23,7 +26,9 @@ const LoginPage = () => {
         password: data.password,
         redirect: false,
       }) as { error?: string };
-
+  
+      console.log('Sign in result:', result);
+  
       if (result.error) {
         setError('email', { type: 'manual', message: 'Invalid credentials' });
       } else {
@@ -39,9 +44,9 @@ const LoginPage = () => {
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
-          Sign in
+      <Box sx={{ marginTop: "15rem", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h5" sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '3rem' }}>
+          Loggin
         </Typography>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1, width: '100%' }}>
           <TextField
@@ -56,6 +61,7 @@ const LoginPage = () => {
             {...register('email', { required: 'Email is required' })}
             error={!!errors.email}
             helperText={errors.email?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <TextField
             margin="normal"
@@ -68,19 +74,20 @@ const LoginPage = () => {
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors.password?.message}
+            sx={{ bgcolor: belWhite }}
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3, mb: 2, bgcolor: belBlue, color: belDarkCyan, fontWeight: 'bold'}}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
           <Link href="/register">
             <Typography component="h1" variant="body1">
-              Não possui uma conta? Registre-se
+              Não possui conta? <span className='font-bold text-belPink text-lg'>Registre-se aqui</span>
             </Typography>
           </Link>
         </Box>

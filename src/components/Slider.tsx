@@ -1,7 +1,6 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-
-import Image from 'next/image';
+import 'swiper/css/autoplay';
 
 const Slider = () => {
   const slides = [
@@ -19,8 +18,8 @@ const Slider = () => {
     >
       {slides.map((slide, index) => (
         <SwiperSlide key={index}>
-          <div className="flex justify-center items-center h-[14rem] xl:h-[40rem]">
-            <Image src={slide} alt={`Slide ${index + 1}`} width={2000} height={600} />
+          <div className="flex justify-center items-center h-[14rem] sm:h-[22rem] md:h-[26rem] lg:h-[32rem] xl:h-[38rem]">
+            <img src={slide} alt={`Slide ${index + 1}`} className="w-full h-auto" />
           </div>
         </SwiperSlide>
       ))}

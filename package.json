@@ -25,6 +25,7 @@
     "next-auth": "^4.24.7",
     "next-connect": "^1.0.0-next.4",
     "nodemailer": "^6.9.14",
+    "prisma": "^5.16.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.52.0",

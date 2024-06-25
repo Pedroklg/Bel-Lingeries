@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Button, Menu, MenuItem, Box } from '@mui/material';
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
@@ -8,12 +8,12 @@ import Image from 'next/image';
 import MenuIcon from '@mui/icons-material/Menu';
 import Avatar from '@mui/material/Avatar';
 import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
+import { palette } from '../../theme';
 import { fetchProductsByCategory } from '@/services/itemsByCategory';
 import { Product } from '@/types/models';
-import { palette } from '../../theme';
-import { useCart } from '@/context/CartContext';
 
-const { belDarkCyan, belDarkBeige, belPink, belLightBeige } = palette;
+const { belDarkCyan, belDarkBeige, belPink, belLightBeige, belBlue, belOrange } = palette;
 
 const Header: React.FC = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -24,6 +24,7 @@ const Header: React.FC = () => {
     const [calcinhas, setCalcinhas] = useState<Product[]>([]);
     const [biquinis, setBiquinis] = useState<Product[]>([]);
     const [cartAnchorEl, setCartAnchorEl] = useState<null | HTMLElement>(null);
+    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
     const { cartItems } = useCart();
     const { user, logout } = useAuth(); // Access user state and logout function from AuthProvider
 
@@ -74,6 +75,14 @@ const Header: React.FC = () => {
         setCartAnchorEl(null);
     };
 
+    const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+        setProfileAnchorEl(event.currentTarget);
+    };
+
+    const handleProfileClose = () => {
+        setProfileAnchorEl(null);
+    };
+
     return (
         <AppBar position="static" sx={{ backgroundColor: belDarkCyan }}>
             <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -100,49 +109,71 @@ const Header: React.FC = () => {
                             textAlign: 'left',
                         },
                     }}>
-                        <Image src="/logo.png" width={120} height={120} alt='Bel Lingeries' className='m-3'/>
+                        <Image src="/logo.png" width={120} height={120} alt='Bel Lingeries' className='m-3' />
                     </Typography>
                 </Link>
                 {/* Right Section - Cart and Menu */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {/* Conditional Rendering based on Authentication State */}
-                    {user ? (
-                        // User is logged in - Show Avatar
-                        <Avatar onClick={toggleMenu}>{user.email.charAt(0).toUpperCase()}</Avatar>
-                    ) : (
-                        // User is not logged in - Show Login and Register Buttons
-                        <>
-                            <Button color="inherit" component={Link} href="/login">Login</Button>
-                            <Button color="inherit" component={Link} href="/register">Register</Button>
-                        </>
-                    )}
                     {/* Cart Icon */}
                     <IconButton onClick={handleCartClick} sx={{ color: belPink }}>
                         <ShoppingBagIcon fontSize='large' />
                     </IconButton>
                     {/* Menu Icon (mobile menu) */}
-                    <Button onClick={toggleMenu}>
-                        <MenuIcon fontSize='large' />
-                    </Button>
-                    {/* Main Menu */}
-                    <Menu
-                        anchorEl={null}
-                        open={menuOpen}
-                        onClose={() => setMenuOpen(false)}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                    >
-                        {/* Static Example Avatar */}
-                        <MenuItem onClick={() => setMenuOpen(false)}>
-                            <Avatar>B</Avatar>
-                        </MenuItem>
-                    </Menu>
+                    {user ? (
+                        <>
+                            <Button onClick={toggleMenu}>
+                                <MenuIcon fontSize='large' />
+                            </Button>
+
+                            < Menu
+                                anchorEl={null}
+                                open={menuOpen}
+                                onClose={() => setMenuOpen(false)}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                sx={{ display: 'flex', mt: 8 }}
+                            >
+                                {/* Static Example Avatar */}
+                                <MenuItem onClick={() => setMenuOpen(false)} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                    <IconButton onClick={handleProfileClick}>
+                                        <Avatar sx={{ color: belPink, bgcolor: belBlue}}>
+                                            {user.user?.name?.charAt(0)}
+                                        </Avatar>
+                                    </IconButton>
+                                    <MenuItem>Perfil</MenuItem>
+                                    <MenuItem>Meus Pedidos</MenuItem>
+                                    <MenuItem>Carrinho</MenuItem>
+                                    {user?.user?.isAdmin && (
+                                        <MenuItem>Admin</MenuItem>
+                                    )}
+                                    <MenuItem onClick={() => { logout(); handleProfileClose(); }}
+                                        sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belDarkBeige, fontWeight: 'bold', borderRadius: '0.5rem', mx: '1rem' }}
+                                    >
+                                        Logout
+                                    </MenuItem>
+                                </MenuItem>
+                            </Menu>
+                        </>
+                    ) : (
+                        <>
+                            <Button component={Link} href="/login"
+                                sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belBlue, fontWeight: 'bold', borderRadius: '0.5rem', mx: '1rem' }}
+                            >
+                                Login
+                            </Button>
+                            <Button component={Link} href="/register"
+                                sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belDarkBeige, fontWeight: 'bold', borderRadius: '0.5rem' }}
+                            >
+                                Register
+                            </Button>
+                        </>
+                    )}
                 </Box>
             </Toolbar>
             {/* Submenu Section */}
@@ -156,28 +187,28 @@ const Header: React.FC = () => {
                 <Button
                     onMouseEnter={(e) => handleSubMenuClick(e, 'conjuntos')}
                     onClick={(e) => handleSubMenuClick(e, 'conjuntos')}
-                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem'}}
+                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem' }}
                 >
                     Conjuntos <ArrowDownIcon />
                 </Button>
                 <Button
                     onMouseEnter={(e) => handleSubMenuClick(e, 'sutias')}
                     onClick={(e) => handleSubMenuClick(e, 'sutias')}
-                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem'}}
+                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem' }}
                 >
                     Sutiãs <ArrowDownIcon />
                 </Button>
                 <Button
                     onMouseEnter={(e) => handleSubMenuClick(e, 'calcinhas')}
                     onClick={(e) => handleSubMenuClick(e, 'calcinhas')}
-                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem'}}
+                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem' }}
                 >
                     Calcinhas <ArrowDownIcon />
                 </Button>
                 <Button
                     onMouseEnter={(e) => handleSubMenuClick(e, 'biquinis')}
                     onClick={(e) => handleSubMenuClick(e, 'biquinis')}
-                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem'}}
+                    sx={{ color: belDarkCyan, fontWeight: 'bold', fontSize: '0.9rem' }}
                 >
                     Biquínis <ArrowDownIcon />
                 </Button>
@@ -257,7 +288,7 @@ const Header: React.FC = () => {
                 <MenuItem onClick={handleCartClose}>Item no carrinho 2</MenuItem>
                 <MenuItem onClick={handleCartClose}>Item no carrinho 3</MenuItem>
             </Menu>
-        </AppBar>
+        </AppBar >
     );
 };
 
