@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Button, Menu, MenuItem, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Button, Menu, MenuItem, Box, Drawer, List, ListItem, ListItemText, Badge } from '@mui/material';
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -12,6 +12,7 @@ import { useCart } from '@/context/CartContext';
 import { palette } from '../../theme';
 import { fetchProductsByCategory } from '@/services/itemsByCategory';
 import { Product } from '@/types/models';
+import router from 'next/router';
 
 const { belDarkCyan, belDarkBeige, belPink, belLightBeige, belBlue, belOrange } = palette;
 
@@ -23,9 +24,8 @@ const Header: React.FC = () => {
     const [conjuntos, setConjuntos] = useState<Product[]>([]);
     const [calcinhas, setCalcinhas] = useState<Product[]>([]);
     const [biquinis, setBiquinis] = useState<Product[]>([]);
-    const [cartAnchorEl, setCartAnchorEl] = useState<null | HTMLElement>(null);
-    const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
-    const { cartItems } = useCart();
+    const [cartOpen, setCartOpen] = useState(false);
+    const { cartItems, addToCart, removeFromCart, clearCart } = useCart();
     const { user, logout } = useAuth(); // Access user state and logout function from AuthProvider
 
     useEffect(() => {
@@ -50,8 +50,12 @@ const Header: React.FC = () => {
         fetchData();
     }, []);
 
+    const handleCategoryClick = (categoryId: number) => async () => {
+        router.push(`/products?category=${categoryId}`);
+    };
+
     const handleMenuItemClick = (product: Product) => {
-        // Implement your logic here for handling menu item clicks
+        router.push(`/product/${product.id}`);
     };
 
     const toggleMenu = () => {
@@ -67,20 +71,22 @@ const Header: React.FC = () => {
         setSubMenuAnchorEl(null);
     };
 
-    const handleCartClick = (event: React.MouseEvent<HTMLElement>) => {
-        setCartAnchorEl(event.currentTarget);
+    const handleCartClick = () => {
+        setCartOpen(!cartOpen);
     };
 
     const handleCartClose = () => {
-        setCartAnchorEl(null);
+        setCartOpen(false);
     };
 
-    const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
-        setProfileAnchorEl(event.currentTarget);
+    const handleAddToCart = (product: Product) => {
+        // Example implementation, you might adjust based on your actual product and variant logic
+        const variant = product.variants[0]; // Assuming first variant for simplicity
+        addToCart(product, variant, 1); // Adding 1 item to the cart
     };
 
-    const handleProfileClose = () => {
-        setProfileAnchorEl(null);
+    const handleRemoveFromCart = (productId: number, variantId: number) => {
+        removeFromCart(productId, variantId);
     };
 
     return (
@@ -116,7 +122,9 @@ const Header: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     {/* Cart Icon */}
                     <IconButton onClick={handleCartClick} sx={{ color: belPink }}>
-                        <ShoppingBagIcon fontSize='large' />
+                        <Badge badgeContent={cartItems.length} color="secondary">
+                            <ShoppingBagIcon fontSize='large'/>
+                        </Badge>
                     </IconButton>
                     {/* Menu Icon (mobile menu) */}
                     {user ? (
@@ -125,40 +133,31 @@ const Header: React.FC = () => {
                                 <MenuIcon fontSize='large' />
                             </Button>
 
-                            < Menu
-                                anchorEl={null}
+                            <Drawer
+                                anchor="right"
                                 open={menuOpen}
                                 onClose={() => setMenuOpen(false)}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                sx={{ display: 'flex', mt: 8 }}
                             >
-                                {/* Static Example Avatar */}
-                                <MenuItem onClick={() => setMenuOpen(false)} sx={{ display: 'flex', flexDirection: 'column' }}>
-                                    <IconButton onClick={handleProfileClick}>
-                                        <Avatar sx={{ color: belPink, bgcolor: belBlue}}>
-                                            {user.user?.name?.charAt(0)}
-                                        </Avatar>
-                                    </IconButton>
-                                    <MenuItem>Perfil</MenuItem>
-                                    <MenuItem>Meus Pedidos</MenuItem>
-                                    <MenuItem>Carrinho</MenuItem>
-                                    {user?.user?.isAdmin && (
-                                        <MenuItem>Admin</MenuItem>
-                                    )}
-                                    <MenuItem onClick={() => { logout(); handleProfileClose(); }}
-                                        sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belDarkBeige, fontWeight: 'bold', borderRadius: '0.5rem', mx: '1rem' }}
-                                    >
-                                        Logout
-                                    </MenuItem>
-                                </MenuItem>
-                            </Menu>
+                                <Box sx={{ width: 250 }}>
+                                    <List>
+                                        <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <Avatar sx={{ color: belPink, bgcolor: belBlue }}>
+                                                {user.user?.name?.charAt(0)}
+                                            </Avatar>
+                                            <ListItemText primary={user.user?.name} />
+                                        </ListItem>
+                                        <MenuItem onClick={() => setMenuOpen(false)}>Perfil</MenuItem>
+                                        <MenuItem onClick={() => setMenuOpen(false)}>Meus Pedidos</MenuItem>
+                                        <MenuItem onClick={() => { setMenuOpen(false); setCartOpen(true); }}>Carrinho</MenuItem>
+                                        {user?.user?.isAdmin && (
+                                            <MenuItem onClick={() => setMenuOpen(false)}>Admin</MenuItem>
+                                        )}
+                                        <MenuItem onClick={() => { logout(); setMenuOpen(false); }} sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belDarkBeige, fontWeight: 'bold', borderRadius: '0.5rem', mx: '1rem' }}>
+                                            Logout
+                                        </MenuItem>
+                                    </List>
+                                </Box>
+                            </Drawer>
                         </>
                     ) : (
                         <>
@@ -231,6 +230,7 @@ const Header: React.FC = () => {
                 {/* Dynamic Menu Items based on selectedMenu state */}
                 {selectedMenu === 'conjuntos' && (
                     <div onMouseLeave={handleSubMenuClose}>
+                        <MenuItem key={'conjuntos'} onClick={handleCategoryClick(1)}>Todos os Conjuntos</MenuItem>
                         {conjuntos.map((product: Product) => (
                             <MenuItem key={product.id} onClick={() => handleMenuItemClick(product)}>
                                 {product.name}
@@ -240,6 +240,7 @@ const Header: React.FC = () => {
                 )}
                 {selectedMenu === 'sutias' && (
                     <div onMouseLeave={handleSubMenuClose}>
+                        <MenuItem key={'sutias'} onClick={handleCategoryClick(4)}>Todos os Sutiãs</MenuItem>
                         {sutias.map((product: Product) => (
                             <MenuItem key={product.id} onClick={() => handleMenuItemClick(product)}>
                                 {product.name}
@@ -249,6 +250,7 @@ const Header: React.FC = () => {
                 )}
                 {selectedMenu === 'calcinhas' && (
                     <div onMouseLeave={handleSubMenuClose}>
+                        <MenuItem key={'calcinhas'} onClick={handleCategoryClick(2)}>Todas as calcinhas</MenuItem>
                         {calcinhas.map((product: Product) => (
                             <MenuItem key={product.id} onClick={() => handleMenuItemClick(product)}>
                                 {product.name}
@@ -258,6 +260,7 @@ const Header: React.FC = () => {
                 )}
                 {selectedMenu === 'biquinis' && (
                     <div onMouseLeave={handleSubMenuClose}>
+                        <MenuItem key={'biquinis'} onClick={handleCategoryClick(3)}>Todos os Biquinis</MenuItem>
                         {biquinis.map((product: Product) => (
                             <MenuItem key={product.id} onClick={() => handleMenuItemClick(product)}>
                                 {product.name}
@@ -270,25 +273,38 @@ const Header: React.FC = () => {
                     <MenuItem disabled>Nenhum item encontrado</MenuItem>
                 )}
             </Menu>
-            {/* Cart Menu */}
-            <Menu
-                anchorEl={cartAnchorEl}
-                open={Boolean(cartAnchorEl)}
-                onClose={handleCartClose}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
-                transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}
+            {/* Cart Drawer */}
+            <Drawer
+                anchor="right"
+                open={cartOpen}
+                onClose={() => setCartOpen(false)}
             >
-                <MenuItem onClick={handleCartClose}>Item no carrinho 1</MenuItem>
-                <MenuItem onClick={handleCartClose}>Item no carrinho 2</MenuItem>
-                <MenuItem onClick={handleCartClose}>Item no carrinho 3</MenuItem>
-            </Menu>
-        </AppBar >
+                <Box sx={{ width: 300 }}>
+                    <List>
+                        {cartItems.length === 0 ? (
+                            <ListItem>
+                                <ListItemText primary="Carrinho vazio" />
+                            </ListItem>
+                        ) : (
+                            cartItems.map((item, index) => (
+                                <ListItem key={index}>
+                                    <ListItemText
+                                        primary={item.product.name}
+                                        secondary={`Quantidade: ${item.quantity}`}
+                                    />
+                                    <IconButton onClick={() => handleRemoveFromCart(item.product.id, item.variant.id)}>
+                                        Remover
+                                    </IconButton>
+                                </ListItem>
+                            ))
+                        )}
+                    </List>
+                    <Button onClick={clearCart} sx={{ marginTop: 'auto', width: '100%' }}>
+                        Limpar Carrinho
+                    </Button>
+                </Box>
+            </Drawer>
+        </AppBar>
     );
 };
 

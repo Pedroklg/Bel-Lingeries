@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Card, CardMedia, CardContent } from '@mui/material';
+import { Box, Typography, Grid, Card, CardMedia } from '@mui/material';
 import { Collection } from '../types/models';
 import { fetchCollections } from '../services/collectionService';
 import { palette } from '../theme';
+import router from 'next/router';
 
 const { belDarkCyan } = palette;
 
-interface CollectionListProps {}
-
-const CollectionList: React.FC<CollectionListProps> = () => {
+const CollectionList: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
 
   useEffect(() => {
@@ -24,15 +23,22 @@ const CollectionList: React.FC<CollectionListProps> = () => {
     fetchCollectionsData();
   }, []);
 
+  const handleClickCollection = (collectionId: number) => () => {
+    router.push(`/products?collection=${collectionId}`);
+  };
+
   return (
     <Box sx={{ padding: '2rem' }}>
-      <Typography variant="h4" sx={{ marginBottom: '1rem', textAlign: 'center', color: belDarkCyan, fontWeight: 'bold' }}>
+      <Typography
+        variant="h4"
+        sx={{ marginBottom: '1rem', textAlign: 'center', color: belDarkCyan, fontWeight: 'bold' }}
+      >
         Coleções
       </Typography>
       <Grid container spacing={4}>
         {collections.map((collection) => (
           <Grid item key={collection.id} xs={12} sm={6} md={3}>
-            <Card>
+            <Card onClick={handleClickCollection(collection.id)}>
               <CardMedia
                 component="img"
                 sx={{ height: 400, width: 400, objectFit: 'cover' }}

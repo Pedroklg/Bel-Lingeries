@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useState } from 'react';
 import { Product, ProductVariant } from '../types/models';
+import { Snackbar, SnackbarContent } from '@mui/material';
+import { set } from 'react-hook-form';
 
 export interface CartItem {
   product: Product;
@@ -50,22 +52,44 @@ const cartReducer = (state: CartItem[], action: any): CartItem[] => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, dispatch] = useReducer(cartReducer, []);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
   const addToCart = (product: Product, variant: ProductVariant, quantity: number) => {
     dispatch({ type: 'ADD_TO_CART', product, variant, quantity });
+    setToastOpen(true);
+    setMessage('Item added to cart');
   };
 
   const removeFromCart = (productId: number, variantId: number) => {
     dispatch({ type: 'REMOVE_FROM_CART', productId, variantId });
+    setToastOpen(true);
+    setMessage('Item removed from cart');
   };
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
+    setToastOpen(true);
+    setMessage('Cart cleared');
+  };
+
+  const handleCloseToast = () => {
+    setToastOpen(false);
   };
 
   return (
     <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart }}>
       {children}
+
+      {/* Toast Notification */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <SnackbarContent message={message} />
+      </Snackbar>
     </CartContext.Provider>
   );
 };
