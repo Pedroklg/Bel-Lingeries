@@ -2,8 +2,10 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
+const secret = process.env.SECRET_KEY || 'default_secret_key';
 
 export default NextAuth({
   providers: [
@@ -50,12 +52,13 @@ export default NextAuth({
           id: token.id as string,
           isAdmin: token.isAdmin
         };
+        const expiresIn = Math.floor(Date.now() / 1000) + (60 * 60); // Unix timestamp for 1 hour from now
+        session.expires = new Date(expiresIn * 1000).toISOString(); // Convert Unix timestamp to ISO string
       }
-      console.log('Session:', session);
       return session;
     }
   },
-  secret: process.env.SECRET_KEY,
+  secret,
   pages: {
     signIn: '/login'
   }

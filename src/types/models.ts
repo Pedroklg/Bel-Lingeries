@@ -21,6 +21,8 @@ export interface Product {
   variants: ProductVariant[];
   categoryId?: number;
   collectionId?: number;
+  createdAt: Date;
+  soldCount: number;
 }
 
 export interface ProductVariant {

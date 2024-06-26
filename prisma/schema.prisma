@@ -28,6 +28,8 @@ model Product {
   category     Category?        @relation(fields: [categoryId], references: [id])
   collection   Collection?      @relation(fields: [collectionId], references: [id])
   variants     ProductVariant[]
+  createdAt    DateTime         @default(now())
+  soldCount    Int              @default(0)
 }
 
 model ProductVariant {

@@ -12,6 +12,8 @@ export interface ProductResponse {
   variants: APIProductVariant[];
   categoryId?: number;
   collectionId?: number;
+  createdAt: Date;
+  soldCount: number;
 }
 
 export interface APIProductVariant {

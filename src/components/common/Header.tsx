@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Button, Menu, MenuItem, Box, Drawer, List, ListItem, ListItemText, Badge } from '@mui/material';
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { palette } from '../../theme';
 import { fetchProductsByCategory } from '@/services/itemsByCategory';
-import { Product } from '@/types/models';
+import { CartItem, Product } from '@/types/models';
 import router from 'next/router';
 
 const { belDarkCyan, belDarkBeige, belPink, belLightBeige, belBlue, belOrange } = palette;
@@ -27,6 +27,8 @@ const Header: React.FC = () => {
     const [cartOpen, setCartOpen] = useState(false);
     const { cartItems, addToCart, removeFromCart, clearCart } = useCart();
     const { user, logout } = useAuth(); // Access user state and logout function from AuthProvider
+    const [cartItemTotal, setCartItemTotal] = useState<number>(0);
+    const [cartPriceTotal, setCartPriceTotal] = useState<number>(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -56,6 +58,27 @@ const Header: React.FC = () => {
 
     const handleMenuItemClick = (product: Product) => {
         router.push(`/product/${product.id}`);
+    };
+
+    const handleAddItem = (productId: number, variantId: number, quantity: number) => {
+        cartItems.map((item) => {
+            if (item.product.id === productId && item.variant.id === variantId) {
+                addToCart(item.product, item.variant, 1);
+            }
+        });
+    };
+
+    const handleSubtractItem = (productId: number, variantId: number, quantity: number) => {
+        if (quantity > 1) {
+            cartItems.map((item) => {
+                if (item.product.id === productId && item.variant.id === variantId) {
+                    addToCart(item.product, item.variant, - 1);
+                }
+            });
+        }
+        else {
+            handleRemoveFromCart(productId, variantId);
+        }
     };
 
     const toggleMenu = () => {
@@ -89,6 +112,14 @@ const Header: React.FC = () => {
         removeFromCart(productId, variantId);
     };
 
+    useEffect(() => {
+        if (cartItems.length === 0) {
+            setCartOpen(false);
+        }
+        setCartItemTotal(cartItems.reduce((acc, item) => acc + item.quantity, 0));
+        setCartPriceTotal(cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0));
+    }, [cartItems]);
+
     return (
         <AppBar position="static" sx={{ backgroundColor: belDarkCyan }}>
             <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -102,7 +133,7 @@ const Header: React.FC = () => {
                     </a>
                 </div>
                 {/* Middle Section - Logo */}
-                <Link href={"/"} passHref>
+                <Link href="/" passHref>
                     <Typography variant="h6" sx={{
                         color: belDarkBeige,
                         display: 'flex',
@@ -123,7 +154,7 @@ const Header: React.FC = () => {
                     {/* Cart Icon */}
                     <IconButton onClick={handleCartClick} sx={{ color: belPink }}>
                         <Badge badgeContent={cartItems.length} color="secondary">
-                            <ShoppingBagIcon fontSize='large'/>
+                            <ShoppingBagIcon fontSize='large' />
                         </Badge>
                     </IconButton>
                     {/* Menu Icon (mobile menu) */}
@@ -286,17 +317,41 @@ const Header: React.FC = () => {
                                 <ListItemText primary="Carrinho vazio" />
                             </ListItem>
                         ) : (
-                            cartItems.map((item, index) => (
-                                <ListItem key={index}>
-                                    <ListItemText
-                                        primary={item.product.name}
-                                        secondary={`Quantidade: ${item.quantity}`}
-                                    />
-                                    <IconButton onClick={() => handleRemoveFromCart(item.product.id, item.variant.id)}>
-                                        Remover
-                                    </IconButton>
+                            <>
+                                {cartItems.map((item, index) => (
+                                    <ListItem key={index} sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+                                        <ListItemText
+                                            primary={item.product.name}
+                                            secondary={`Quantidade: ${item.quantity}`}
+                                        />
+                                        <ListItemText>
+                                            Preço: R$ {(item.product.price * item.quantity).toFixed(2)}
+                                        </ListItemText>
+                                        <ListItemText>
+                                            Tamanho: {item.variant.size}
+                                        </ListItemText>
+                                        <ListItemText>
+                                            Cor: {item.variant.color}
+                                        </ListItemText>
+                                        <IconButton onClick={() => handleSubtractItem(item.product.id, item.variant.id, item.quantity)}>
+                                            -
+                                        </IconButton>
+                                        <IconButton onClick={() => handleAddItem(item.product.id, item.variant.id, item.quantity)}>
+                                            +
+                                        </IconButton>
+                                        <IconButton onClick={() => handleRemoveFromCart(item.product.id, item.variant.id)}>
+                                            Remover
+                                        </IconButton>
+                                    </ListItem>
+                                ))}
+                                < ListItem sx={{ bottom: "0" }}>
+                                    <ListItemText primary={`Total de itens: ${cartItemTotal}`} />
+                                    <ListItemText primary={`Total: R$ ${cartPriceTotal.toFixed(2)}`} />
                                 </ListItem>
-                            ))
+                                <IconButton onClick={() => console.log("resumo da compra")}>
+                                    Finalizar Compra
+                                </IconButton>
+                            </>
                         )}
                     </List>
                     <Button onClick={clearCart} sx={{ marginTop: 'auto', width: '100%' }}>
@@ -304,7 +359,7 @@ const Header: React.FC = () => {
                     </Button>
                 </Box>
             </Drawer>
-        </AppBar>
+        </AppBar >
     );
 };
 

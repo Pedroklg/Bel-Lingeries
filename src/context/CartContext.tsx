@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useReducer, useState } from 'react';
 import { Product, ProductVariant } from '../types/models';
 import { Snackbar, SnackbarContent } from '@mui/material';
-import { set } from 'react-hook-form';
 
 export interface CartItem {
   product: Product;

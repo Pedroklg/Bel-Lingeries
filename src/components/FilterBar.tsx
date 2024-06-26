@@ -39,7 +39,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
 
     const handleFilter = () => {
         const priceRange: [number, number] = [Number(minPrice), Number(maxPrice)];
-        priceRange[1] === 0 ? priceRange[1] = Infinity : priceRange[1] = priceRange[1]; 
+        priceRange[1] === 0 ? priceRange[1] = Infinity : priceRange[1];
         onFilter({ search, category, collection, priceRange });
     };
 

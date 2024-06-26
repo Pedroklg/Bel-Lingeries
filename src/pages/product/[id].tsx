@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { fetchProductById } from '@/services/productService';
 import { ProductResponse, ProductSize, ProductColor, APIProductVariant, APIAdditionalImage } from '../../types/api';
 import MainLayout from '@/layouts/MainLayout';
-import { Typography, Button, Grid, Box } from '@mui/material';
+import { Typography, Button, Grid, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css/bundle';
 import { useCart } from '@/context/CartContext';
@@ -14,6 +14,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState<ProductResponse | null>(null);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [availableSizes, setAvailableSizes] = useState<ProductSize[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const { addToCart } = useCart(); // Access addToCart function from CartContext
 
@@ -33,10 +34,11 @@ const ProductPage = () => {
             additionalImages: initialColor.additionalImages.map((image: APIAdditionalImage) => image.imageUrl),
           });
           setSelectedImage(initialColor.frontImage); // Set initial big image
-          setAvailableSizes([{
-            size: initialColor.size,
-            stock: initialColor.stock,
-          }]);
+          setAvailableSizes(productData.variants.map(variant => ({
+            size: variant.size,
+            stock: variant.stock,
+          })));
+          setSelectedSize(initialColor.size); // Set initial size
         }
       }
     };
@@ -52,6 +54,7 @@ const ProductPage = () => {
         size: variant.size,
         stock: variant.stock,
       }]);
+      setSelectedSize(variant.size); // Update size when color changes
     }
   };
 
@@ -59,9 +62,15 @@ const ProductPage = () => {
     setSelectedImage(image); // Update big image on thumbnail click
   };
 
+  const handleSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSelectedSize(event.target.value as string);
+  };
+
   const handleAddToCart = () => {
-    if (product && selectedColor) {
-      const selectedVariant = product.variants.find(variant => variant.color === selectedColor.color);
+    if (product && selectedColor && selectedSize) {
+      const selectedVariant = product.variants.find(variant => 
+        variant.color === selectedColor.color && variant.size === selectedSize
+      );
       if (selectedVariant) {
         addToCart(product, selectedVariant, 1); // Assuming quantity is 1 for simplicity
       }
@@ -150,17 +159,16 @@ const ProductPage = () => {
               <Grid container spacing={2}>
                 {product.variants.map((variant, index) => (
                   <Grid item key={index}>
-                    <Button
-                      variant={selectedColor?.color === variant.color ? 'contained' : 'outlined'}
+                    <div
+                      className={`w-8 h-8 rounded-full cursor-pointer ${selectedColor?.color === variant.color ? 'border-2 border-black' : ''}`}
+                      style={{ backgroundColor: variant.color }}
                       onClick={() => handleColorChange({
                         color: variant.color,
                         frontImage: variant.frontImage,
                         backImage: variant.backImage,
                         additionalImages: variant.additionalImages.map((image: APIAdditionalImage) => image.imageUrl),
                       })}
-                    >
-                      {variant.color}
-                    </Button>
+                    ></div>
                   </Grid>
                 ))}
               </Grid>
@@ -170,10 +178,15 @@ const ProductPage = () => {
               <Typography variant="h6" gutterBottom>
                 Available Sizes
               </Typography>
-              <Grid container spacing={1}>
+              <Grid container spacing={2}>
                 {availableSizes.map((size, index) => (
                   <Grid item key={index}>
-                    <Typography>{size.size}</Typography>
+                    <div
+                      className={`w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${selectedSize === size.size ? 'border-2 border-black' : ''}`}
+                      onClick={() => setSelectedSize(size.size)}
+                    >
+                      {size.size}
+                    </div>
                   </Grid>
                 ))}
               </Grid>

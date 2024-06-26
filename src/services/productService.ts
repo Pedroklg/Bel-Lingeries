@@ -65,10 +65,33 @@ export const fetchNewestProducts = async (limit: number): Promise<Product[]> => 
       variants: productResponse.variants.map(mapApiProductVariantToModel),
       categoryId: productResponse.categoryId,
       collectionId: productResponse.collectionId,
+      createdAt: new Date(productResponse.createdAt),
+      soldCount: productResponse.soldCount,
     }));
     return products;
   } catch (error) {
     console.error('Error fetching newest products:', error);
+    throw error;
+  }
+};
+
+export const fetchBestSellers = async (limit: number): Promise<Product[]> => {
+  try {
+    const response = await axios.get<ProductResponse[]>(`${API_URL}?type=best-sellers&limit=${limit}`);
+    const products: Product[] = response.data.map(productResponse => ({
+      id: productResponse.id,
+      name: productResponse.name,
+      description: productResponse.description,
+      price: productResponse.price,
+      variants: productResponse.variants.map(mapApiProductVariantToModel),
+      categoryId: productResponse.categoryId,
+      collectionId: productResponse.collectionId,
+      createdAt: new Date(productResponse.createdAt),
+      soldCount: productResponse.soldCount,
+    }));
+    return products;
+  } catch (error) {
+    console.error('Error fetching best sellers:', error);
     throw error;
   }
 };
