@@ -3,7 +3,7 @@ import { ProductResponse } from '@/types/api';
 import { Product } from '@/types/models';
 import { mapApiProductVariantToModel } from '@/utils/ProductResponseProduct';
 
-const API_URL = '/api/products';
+const API_URL = '/api/productsGET';
 
 export const fetchAllProducts = async (): Promise<Product[]> => {
   try {
@@ -25,36 +25,7 @@ export const fetchProductById = async (id: number): Promise<Product> => {
   }
 };
 
-export const createProduct = async (product: ProductResponse): Promise<Product> => {
-  try {
-    const response = await axios.post<Product>(API_URL, product);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating product:', error);
-    throw error;
-  }
-};
-
-export const updateProduct = async (id: number, product: ProductResponse): Promise<Product> => {
-  try {
-    const response = await axios.put<Product>(`${API_URL}/${id}`, product);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating product ${id}:`, error);
-    throw error;
-  }
-};
-
-export const deleteProduct = async (id: number): Promise<void> => {
-  try {
-    await axios.delete(`${API_URL}/${id}`);
-  } catch (error) {
-    console.error(`Error deleting product ${id}:`, error);
-    throw error;
-  }
-};
-
-export const fetchNewestProducts = async (limit: number): Promise<Product[]> => {
+export const fetchNewestProducts = async (limit?: number): Promise<Product[]> => {
   try {
     const response = await axios.get<ProductResponse[]>(`${API_URL}?type=newest&limit=${limit}`);
     const products: Product[] = response.data.map(productResponse => ({
@@ -75,7 +46,7 @@ export const fetchNewestProducts = async (limit: number): Promise<Product[]> => 
   }
 };
 
-export const fetchBestSellers = async (limit: number): Promise<Product[]> => {
+export const fetchBestSellers = async (limit?: number): Promise<Product[]> => {
   try {
     const response = await axios.get<ProductResponse[]>(`${API_URL}?type=best-sellers&limit=${limit}`);
     const products: Product[] = response.data.map(productResponse => ({

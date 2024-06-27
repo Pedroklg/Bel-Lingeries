@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { Product } from '../types/models';
-import { fetchBestSellers } from '../services/productService';
+import { fetchBestSellers } from '../services/productGETService';
 import ProductCard from './common/ProductCard';
 import { palette } from '../theme';
 

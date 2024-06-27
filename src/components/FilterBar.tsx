@@ -3,6 +3,9 @@ import { TextField, MenuItem, Box, Grid, Button } from '@mui/material';
 import { Category, Collection } from '../types/models';
 import { fetchAllCategories } from '@/services/categoryService';
 import { fetchCollections } from '@/services/collectionService';
+import { palette } from '@/theme';
+
+const { belBlue, belDarkCyan, belPink, belWhite } = palette;
 
 interface FilterBarProps {
     onFilter: (filters: any) => void;
@@ -52,6 +55,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         fullWidth
+                        color='secondary'
+                        sx={{ bgcolor: belWhite }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
@@ -61,6 +66,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
                         value={category || ''}
                         onChange={(e) => setCategory(e.target.value === '' ? null : Number(e.target.value))}
                         fullWidth
+                        color='secondary'
+                        sx={{ bgcolor: belWhite }}
                     >
                         <MenuItem value="">None</MenuItem>
                         {categories.map((cat) => (
@@ -77,6 +84,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
                         value={collection || ''}
                         onChange={(e) => setCollection(e.target.value === '' ? null : Number(e.target.value))}
                         fullWidth
+                        color='secondary'
+                        sx={{ bgcolor: belWhite }}
                     >
                         <MenuItem value="">None</MenuItem>
                         {collections.map((col) => (
@@ -95,6 +104,8 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
                                 value={minPrice}
                                 onChange={(e) => setMinPrice(e.target.value)}
                                 fullWidth
+                                color='secondary'
+                                sx={{ bgcolor: belWhite }}
                             />
                         </Grid>
                         <Grid item xs={2} textAlign="center">
@@ -109,13 +120,15 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, initialFilters }) => {
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(e.target.value)}
                                 fullWidth
+                                color='secondary'
+                                sx={{ bgcolor: belWhite }}
                             />
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <Button variant="contained" color="primary" onClick={handleFilter}>
-                        Apply Filters
+                <Grid item xs={12} sm={6} md={3} sx={{ ml: "auto" }}>
+                    <Button variant="contained" color="secondary" onClick={handleFilter} sx={{ color: belDarkCyan, fontWeight: "bold"}}>
+                        Aplicar Filtros
                     </Button>
                 </Grid>
             </Grid>

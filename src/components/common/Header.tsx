@@ -181,7 +181,7 @@ const Header: React.FC = () => {
                                         <MenuItem onClick={() => setMenuOpen(false)}>Meus Pedidos</MenuItem>
                                         <MenuItem onClick={() => { setMenuOpen(false); setCartOpen(true); }}>Carrinho</MenuItem>
                                         {user?.user?.isAdmin && (
-                                            <MenuItem onClick={() => setMenuOpen(false)}>Admin</MenuItem>
+                                            <MenuItem onClick={() => router.push('/admin/dashboard')}>Admin</MenuItem>
                                         )}
                                         <MenuItem onClick={() => { logout(); setMenuOpen(false); }} sx={{ color: belDarkCyan, padding: '0.25rem 0.5rem', bgcolor: belDarkBeige, fontWeight: 'bold', borderRadius: '0.5rem', mx: '1rem' }}>
                                             Logout

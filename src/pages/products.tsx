@@ -1,12 +1,15 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Grid, Typography, CircularProgress, Box, FormControl, MenuItem, InputLabel, Select } from '@mui/material';
 import { Product } from '../types/models';
 import ProductCard from '../components/common/ProductCard';
 import FilterBar from '../components/FilterBar';
 import MainLayout from '@/layouts/MainLayout';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { fetchAllProducts } from '../services/productService';
+import { fetchAllProducts } from '../services/productGETService';
 import { useRouter } from 'next/router';
+import { palette } from '@/theme';
+
+const { belDarkCyan, belBlue } = palette;
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]); // State for all products
@@ -107,13 +110,13 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleFilterChange = (filters: any) => {
-    applyFilters(filters); // Callback function to apply filters from FilterBar
+    applyFilters(filters);
   };
 
   return (
     <MainLayout>
       <Container>
-        <Typography variant="h3" component="h1" className="text-center my-8">
+        <Typography variant="h2" component="h1" className="text-center my-8" sx={{ color: belDarkCyan, fontWeight: "bold" }}>
           Produtos
         </Typography>
         <FilterBar
@@ -129,17 +132,19 @@ const ProductsPage: React.FC = () => {
           }}
         />
         <FormControl variant="outlined" style={{ minWidth: 120, marginBottom: 20 }}>
-          <InputLabel id="sort-label">Sort by</InputLabel>
+          <InputLabel id="sort-label" color="success">Ordenar por</InputLabel>
           <Select
             labelId="sort-label"
             value={sortOption}
             onChange={(e: SelectChangeEvent) => handleSortChange(e.target.value as string)}
             label="Sort by"
+            color='success'
+            sx={{ bgcolor: belBlue, opacity: 0.8 }}
           >
-            <MenuItem value="newest">Newest</MenuItem>
-            <MenuItem value="mostSold">Most Sold</MenuItem>
-            <MenuItem value="priceAsc">Price Ascending</MenuItem>
-            <MenuItem value="priceDesc">Price Descending</MenuItem>
+            <MenuItem value="newest">Mais novos</MenuItem>
+            <MenuItem value="mostSold">Mais vendidos</MenuItem>
+            <MenuItem value="priceAsc">Preço crescente</MenuItem>
+            <MenuItem value="priceDesc">Preço descendente</MenuItem>
           </Select>
         </FormControl>
         {loading ? (

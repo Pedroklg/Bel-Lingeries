@@ -63,55 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Error fetching products:', error);
       return res.status(500).json({ error: 'Failed to fetch products' });
     }
-  } else if (req.method === 'POST') {
-    try {
-      const { name, description, price, categories, variants } = req.body;
-
-      if (!name || !description || !price || !categories || !variants) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      const createdProduct = await prisma.product.create({
-        data: {
-          name,
-          description,
-          price,
-          category: {
-            connect: categories.map((categoryId: number) => ({ id: categoryId })),
-          },
-          variants: {
-            create: variants.map((variant: any) => ({
-              color: variant.color,
-              size: variant.size,
-              stock: variant.stock,
-              frontImage: variant.frontImage,
-              backImage: variant.backImage,
-              additionalImages: {
-                createMany: {
-                  data: variant.additionalImages.map((image: any) => ({
-                    imageUrl: image.imageUrl,
-                  })),
-                },
-              },
-            })),
-          },
-        },
-        include: {
-          category: true,
-          variants: {
-            include: {
-              additionalImages: true,
-            },
-          },
-        },
-      });
-
-      return res.status(201).json(createdProduct);
-    } catch (error) {
-      console.error('Error creating product:', error);
-      return res.status(500).json({ error: 'Failed to create product' });
-    }
-  } else {
-    return res.setHeader('Allow', ['GET', 'POST']).status(405).json({ message: `Method ${req.method} not allowed` });
+  }
+  else {
+    return res.setHeader('Allow', ['GET']).status(405).json({ message: `Method ${req.method} not allowed` });
   }
 }
