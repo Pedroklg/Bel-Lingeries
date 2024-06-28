@@ -25,11 +25,13 @@ export default NextAuth({
         });
 
         if (user && await compare(credentials.password, user.password)) {
+          const token = jwt.sign({ userId: user.id }, secret, { expiresIn: '1h' });
           return {
             id: user.id.toString(),
             email: user.email,
             name: user.name ?? null,
-            isAdmin: user.isAdmin
+            isAdmin: user.isAdmin,
+            accessToken: token
           };
         } else {
           return null;
@@ -42,6 +44,7 @@ export default NextAuth({
       if (user) {
         token.id = user.id as string;
         token.isAdmin = user.isAdmin;
+        token.accessToken = user.accessToken;
       }
       return token;
     },
@@ -50,7 +53,10 @@ export default NextAuth({
         session.user = {
           ...session.user,
           id: token.id as string,
-          isAdmin: token.isAdmin
+          email: token.email as string,
+          name: token.name as string | null,
+          isAdmin: token.isAdmin,
+          accessToken: token.accessToken as string,
         };
         const expiresIn = Math.floor(Date.now() / 1000) + (60 * 60); // Unix timestamp for 1 hour from now
         session.expires = new Date(expiresIn * 1000).toISOString(); // Convert Unix timestamp to ISO string

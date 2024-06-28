@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/layouts/AdminLayout';
-import { fetchOrdersSummary } from '@/services/admin/ordersService';
+import { getOrders } from '@/services/admin/ordersService';
 import { useAuth } from '@/context/AuthContext';
 import { fetchBestSellers } from '@/services/productGETService';
 import { Typography, List, ListItem, ListItemText, Divider, Paper, Grid } from '@mui/material';
@@ -19,7 +19,7 @@ const DashboardPage: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const orders = await fetchOrdersSummary();
+      const orders = await getOrders();
       setOrdersSummary(orders);
     } catch (error) {
       console.error('Failed to fetch orders summary:', error);
@@ -42,7 +42,7 @@ const DashboardPage: React.FC = () => {
             <Grid item xs={12}>
               <Paper>
                 <Typography variant="h5" gutterBottom>
-                  Orders Summary
+                  Resumo dos Pedidos
                 </Typography>
                 <List>
                   {ordersSummary.map((order) => (

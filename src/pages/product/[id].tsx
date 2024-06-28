@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { fetchProductById } from '@/services/productService';
+import { fetchProductById } from '@/services/productGETService';
 import { ProductResponse, ProductSize, ProductColor, APIProductVariant, APIAdditionalImage } from '../../types/api';
 import MainLayout from '@/layouts/MainLayout';
 import { Typography, Button, Grid, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';

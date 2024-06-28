@@ -17,7 +17,7 @@ export const fetchAllProducts = async (): Promise<Product[]> => {
 
 export const fetchProductById = async (id: number): Promise<Product> => {
   try { 
-    const response = await axios.get<ProductResponse>(`${API_URL}/${id}`);
+    const response = await axios.get<ProductResponse>(`${API_URL}?id=${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching product ${id}:`, error);

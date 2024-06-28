@@ -1,22 +1,42 @@
 import axios from 'axios';
 import { User } from '@prisma/client';
-
-export const createUser = async (userData : User) => {
-  const response = await axios.post('/api/admin/users', userData);
-  return response.data;
-};
+import { getSession } from 'next-auth/react';
 
 export const getUsers = async () => {
-  const response = await axios.get('/api/admin/users');
+  const session = await getSession();
+  if (!session || !session.user.accessToken) {
+    throw new Error('No token found');
+  }
+  const response = await axios.get('/api/admin/users', {
+    headers: {
+      Authorization: `Bearer ${session.user.accessToken}`,
+    },
+  });
   return response.data;
 };
 
-export const updateUser = async (userId : number, userData : User) => {
-  const response = await axios.put(`/api/admin/users/${userId}`, userData);
+export const updateUser = async (userId: number, userData: User) => {
+  const session = await getSession();
+  if (!session || !session.user.accessToken) {
+    throw new Error('No token found');
+  }
+  const response = await axios.put(`/api/admin/users/${userId}`, userData, {
+    headers: {
+      Authorization: `Bearer ${session.user.accessToken}`,
+    },
+  });
   return response.data;
 };
 
-export const deleteUser = async (userId : number) => {
-  const response = await axios.delete(`/api/admin/users/${userId}`);
+export const deleteUser = async (userId: number) => {
+  const session = await getSession();
+  if (!session || !session.user.accessToken) {
+    throw new Error('No token found');
+  }
+  const response = await axios.delete(`/api/admin/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${session.user.accessToken}`,
+    },
+  });
   return response.data;
 };

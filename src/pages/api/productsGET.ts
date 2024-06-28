@@ -54,6 +54,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         });
         return res.status(200).json(products);
+      } else if (req.query.id) {
+        const product = await prisma.product.findUnique({
+          where: {
+            id: Number(req.query.id),
+          },
+          include: {
+            category: true,
+            variants: {
+              include: {
+                additionalImages: true,
+              },
+            },
+          },
+        });
+        return res.status(200).json(product);
       }
       // Method not allowed for other queries on GET
       else {
