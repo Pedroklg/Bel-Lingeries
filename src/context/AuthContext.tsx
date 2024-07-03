@@ -42,10 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (result && !result?.error) {
         console.log('Login successful');
-        const updatedSession = await useSession();
-        if (updatedSession) {
-          localStorage.setItem('session', JSON.stringify(updatedSession));
+        if (result?.error) {
+          throw new Error(result.error);
         }
+        localStorage.setItem('session', JSON.stringify(result));
       } else {
         throw new Error('Invalid credentials');
       }
@@ -100,11 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     if (status === 'authenticated') {
       loadUser();
-      if (session) {
-        localStorage.setItem('session', JSON.stringify(session));
-      }
     }
-  }, [status, session]);
+  }, [status]);
 
   return (
     <AuthContext.Provider value={{ user: session, login, logout, loadUser }}>

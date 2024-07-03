@@ -39,7 +39,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const menuItems = [
     { text: 'Home', href: '/admin/dashboard' },
     { text: 'Products', href: '/admin/products' },
-    { text: 'Product Variants', href: '/admin/product-variants' },
+    { text: 'Product Variants', href: '/admin/productVariant' },
     { text: 'Collections', href: '/admin/collections' },
     { text: 'Categories', href: '/admin/categories' },
     { text: 'Orders', href: '/admin/orders' },
