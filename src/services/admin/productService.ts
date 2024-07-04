@@ -1,15 +1,5 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
-
-const getAuthHeaders = async () => {
-  const session = await getSession();
-  if (!session || !session.user.accessToken) {
-    throw new Error('No token found');
-  }
-  return {
-    Authorization: `Bearer ${session.user.accessToken}`,
-  };
-};
+import { getAuthHeaders } from '@/utils/authHeaders';
 
 export const createProduct = async (data: any) => {
   const headers = await getAuthHeaders();

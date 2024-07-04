@@ -3,20 +3,13 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import axios from 'axios';
 import { Snackbar, SnackbarContent } from '@mui/material';
 import { Session } from 'next-auth';
+import { getSession } from 'next-auth/react';
 
 type AuthContextType = {
   user: Session | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loadUser: () => Promise<void>;
-};
-
-const getSessionFromLocalStorage = (): Session | null => {
-  const session = localStorage.getItem('session');
-  if (session) {
-    return JSON.parse(session);
-  }
-  return null;
 };
 
 const isSessionExpired = (session: Session): boolean => {
@@ -57,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadUser = async () => {
     try {
-      const session = getSessionFromLocalStorage();
+      const session = await getSession();
       if (session && session.user.accessToken) {
         const response = await axios.get('/api/auth/me', {
           headers: {
@@ -68,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         throw new Error('No valid session found');
       }
-    } catch (error: any) {
+    } catch (error : any) {
       console.error('Failed to load user:', error.response?.status, error.response?.data);
       if (error.response?.status === 401) {
         setToastOpen(true);
@@ -92,15 +85,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const session = getSessionFromLocalStorage();
-    if (session && isSessionExpired(session)) {
-      logout();
-      setToastOpen(true);
-      setMessage('Session expired. Please log in again');
-    }
-    if (status === 'authenticated') {
-      loadUser();
-    }
+    const fetchData = async () => {
+      const session = await getSession();
+      if (session && isSessionExpired(session)) {
+        logout();
+        setToastOpen(true);
+        setMessage('Session expired. Please log in again');
+      }
+      if (status === 'authenticated') {
+        await loadUser();
+      }
+    };
+  
+    fetchData();
   }, [status]);
 
   return (

@@ -1,17 +1,7 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import { getAuthHeaders } from '@/utils/authHeaders';
 
 const BASE_URL = '/api/admin/productVariants';
-
-const getAuthHeaders = async () => {
-  const session = await getSession();
-  if (!session || !session.user.accessToken) {
-    throw new Error('No token found');
-  }
-  return {
-    Authorization: `Bearer ${session.user.accessToken}`,
-  };
-};
 
 export const createProductVariant = async (formData: FormData) => {
   const headers = await getAuthHeaders();

@@ -25,7 +25,7 @@ export default NextAuth({
         });
 
         if (user && await compare(credentials.password, user.password)) {
-          const token = jwt.sign({ userId: user.id }, secret, { expiresIn: '1h' });
+          const token = jwt.sign({ userId: user.id, isAdmin: user.isAdmin }, secret, { expiresIn: '1h' });
           return {
             id: user.id.toString(),
             email: user.email,
@@ -42,7 +42,7 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id as string;
+        token.id = user.id;
         token.isAdmin = user.isAdmin;
         token.accessToken = user.accessToken;
       }
@@ -52,7 +52,7 @@ export default NextAuth({
       if (token && token.id) {
         session.user = {
           ...session.user,
-          id: token.id as string,
+          id: token.id,
           email: token.email as string,
           name: token.name as string | null,
           isAdmin: token.isAdmin,

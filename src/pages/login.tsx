@@ -27,8 +27,6 @@ const LoginPage = () => {
         redirect: false,
       }) as { error?: string };
   
-      console.log('Sign in result:', result);
-  
       if (result.error) {
         setError('email', { type: 'manual', message: 'Invalid credentials' });
       } else {

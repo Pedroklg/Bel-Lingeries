@@ -4,7 +4,6 @@ import prisma from '../../../../lib/prisma';
 import authMiddleware from '../../../../middleware/authMiddleware';
 import { deleteImageFromCloudinary, processAndStoreImage } from '../../../../utils/imageProcessing';
 
-// Multer setup
 const upload = multer({
   storage: multer.memoryStorage(), // Store files in memory
   limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
@@ -17,7 +16,7 @@ upload.fields([
 ]);
 
 const handler = async (req: NextApiRequest & { files?: any }, res: NextApiResponse) => {
-  const { id } = req.query; // Retrieve id from query parameters
+  const { id } = req.query;
 
   switch (req.method) {
     case 'GET':
@@ -111,44 +110,9 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         return res.status(500).json({ message: 'Internal server error' });
       }
 
-    case 'DELETE':
-      try {
-        const productVariantToDelete = await prisma.productVariant.findUnique({
-          where: { id: Number(id) },
-          include: { additionalImages: true },
-        });
-
-        if (!productVariantToDelete) {
-          return res.status(404).json({ message: 'Product variant not found' });
-        }
-
-        // Delete images associated with the product variant from Cloudinary
-        if (productVariantToDelete.frontImage) {
-          await deleteImageFromCloudinary(productVariantToDelete.frontImage);
-        }
-
-        if (productVariantToDelete.backImage) {
-          await deleteImageFromCloudinary(productVariantToDelete.backImage);
-        }
-
-        for (const image of productVariantToDelete.additionalImages) {
-          await deleteImageFromCloudinary(image.imageUrl);
-        }
-
-        // Delete the product variant from the database
-        const deletedProductVariant = await prisma.productVariant.delete({
-          where: { id: Number(id) },
-        });
-
-        return res.status(200).json(deletedProductVariant);
-      } catch (error) {
-        console.error('Error deleting product variant:', error);
-        return res.status(500).json({ message: 'Internal server error' });
-      }
-
     default:
       return res.status(405).json({ message: 'Method not allowed' });
   }
 };
 
-export default authMiddleware(handler, true);
+export default authMiddleware(handler, true); // true if admin access is required
