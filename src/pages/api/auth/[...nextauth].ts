@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const secret = process.env.SECRET_KEY || 'default_secret_key';
 
-export default NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -40,7 +40,7 @@ export default NextAuth({
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any, user: any }) {
       if (user) {
         token.id = user.id;
         token.isAdmin = user.isAdmin;
@@ -48,7 +48,7 @@ export default NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any, token: any }) {
       if (token && token.id) {
         session.user = {
           ...session.user,
@@ -68,4 +68,6 @@ export default NextAuth({
   pages: {
     signIn: '/login'
   }
-});
+};
+
+export default NextAuth(authOptions);

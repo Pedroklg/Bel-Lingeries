@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse, NextApiHandler } from 'next';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../pages/api/auth/[...nextauth]';
 
 interface CustomNextApiRequest extends NextApiRequest {
   user?: any;
@@ -8,8 +9,7 @@ interface CustomNextApiRequest extends NextApiRequest {
 const authMiddleware = (handler: NextApiHandler, requireAdmin: boolean = false) => {
   return async (req: CustomNextApiRequest, res: NextApiResponse) => {
     try {
-      const session = await getSession({ req });
-      console.log('Session:', session);
+      const session = await getServerSession(req, res, authOptions);
 
       if (!session || !session.user || !session.user.accessToken) {
         console.log('Unauthorized access attempt:', session);

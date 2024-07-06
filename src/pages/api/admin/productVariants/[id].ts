@@ -37,9 +37,15 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
       }
 
     case 'PUT':
-      const { updatedColor, updatedSize, updatedStock, updatedProductId } = req.body;
+    try {
+      const updatedColor = req.body['updatedColor'];
+      const updatedSize = req.body['updatedSize'];
+      const updatedStock = req.body['updatedStock'];
+  
+      console.log('req.body:', req.body); // Debug log to check req.body contents
+      console.log(req.body.updatedColor, req.body.updatedSize, req.body.updatedStock); // Debug log to check req.body contents
+      console.log(updatedColor, updatedSize, updatedStock); // Debug log to check updated values
 
-      try {
         const currentProductVariant = await prisma.productVariant.findUnique({
           where: { id: Number(id) },
           include: { additionalImages: true },
@@ -52,6 +58,7 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         let updatedFrontImageUrl = currentProductVariant.frontImage;
         let updatedBackImageUrl = currentProductVariant.backImage;
         const updatedAdditionalImagesUrls = [];
+        let deletedImages = [];
 
         // Process and store updated front image if provided
         if (req.files?.frontImage) {
@@ -80,7 +87,10 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
 
           // Delete previous additional images from Cloudinary
           for (const image of currentProductVariant.additionalImages) {
-            await deleteImageFromCloudinary(image.imageUrl);
+            if (image.imageUrl && !updatedAdditionalImagesUrls.includes(image.imageUrl)) {
+              deletedImages.push(image.imageUrl);
+              await deleteImageFromCloudinary(image.imageUrl);
+            }
           }
         }
 
@@ -88,21 +98,22 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         const updatedProductVariant = await prisma.productVariant.update({
           where: { id: Number(id) },
           data: {
-            color: updatedColor,
-            size: updatedSize,
-            stock: Number(updatedStock),
-            productId: Number(updatedProductId),
+            color: updatedColor || currentProductVariant.color,
+            size: updatedSize || currentProductVariant.size,
+            stock: updatedStock ? Number(updatedStock) : currentProductVariant.stock,
             frontImage: updatedFrontImageUrl || '',
             backImage: updatedBackImageUrl || '',
             additionalImages: {
-              deleteMany: {},
-              create: updatedAdditionalImagesUrls.map(url => ({ imageUrl: url })),
+              create: updatedAdditionalImagesUrls.map(url => ({ imageUrl: url })), // Add new additional images
+              deleteMany: deletedImages.map(url => ({ imageUrl: url })), // Delete old additional images
             },
           },
           include: {
             additionalImages: true,
           },
         });
+
+        console.log('Variant saved:', updatedProductVariant); // Debug log for confirmation
 
         return res.status(200).json(updatedProductVariant);
       } catch (error) {
