@@ -63,7 +63,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error : any) {
       console.error('Failed to load user:', error.response?.status, error.response?.data);
-      if (error.response?.status === 401) {
+      if (session && isSessionExpired(session)) {
+        setToastOpen(true);
+        setMessage('Session expired. Please log in again');
+        await logout();
+      } else if (error.response?.status === 401) {
         setToastOpen(true);
         setMessage('Unauthorized. Please log in again.');
         await logout();
