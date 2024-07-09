@@ -1,116 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { Collection } from '@prisma/client';
-import { Grid, Button, TextField } from '@mui/material';
-import { createCollection, getCollections, updateCollection, deleteCollection } from '@/services/admin/collectionService';
+import { useEffect, useState } from "react";
+import { Category } from "@/types/models";
+import { fetchAllCategories } from "@/services/categoryService";
+import { deleteCategory, updateCategory, createCategory } from "@/services/admin/categoryService";
+import { set } from "react-hook-form";
 
-const CollectionsPage: React.FC = () => {
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [collection, setCollection] = useState<Collection>({
-    id: 0,
-    name: '',
-    image: '',
-  });
+function Categories() {
+  const [category, setCategory] = useState<Category>({ id: 0, name: "", products: [] });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fetchedCollections = await getCollections();
-        setCollections(fetchedCollections);
-      } catch (error) {
-        console.error('Error fetching collections:', error);
-      }
+    // Get categories from the server
+    const fetchCategories = async () => {
+      const categories = await fetchAllCategories();
+      setCategories(categories);
     };
 
-    fetchData();
+    fetchCategories();
+
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const addCategory = () => {
+    createCategory(category);
+  };
+
+  const handleEdit = (id: number) => () => {
+    const category = categories.find((c) => c.id === id);
+    if (category) {
+      setCategory(category);
+      setIsEditing(true);
+    }
+  };
+
+  const handleDelete = (id: number) => async () => {
+    await deleteCategory(id);
+    setCategories(categories.filter((c) => c.id !== id));
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      if (collection.id) {
-        await updateCollection(collection.id, collection);
+      e.preventDefault();
+      if (isEditing) {
+        updateCategory(category.id, category);
       } else {
-        await createCollection(collection);
+        addCategory();
       }
-      // Refresh collections list
-      const fetchedCollections = await getCollections();
-      setCollections(fetchedCollections);
-      // Reset form
-      setCollection({ id: 0, name: '', image: ''});
+      console.log("Category added");
+      setCategory({ id: 0, name: "", products: [] });
     } catch (error) {
-      console.error('Error:', error);
+      console.error(error);
     }
-  };
-
-  const handleDelete = async (collectionId: number) => {
-    try {
-      await deleteCollection(collectionId);
-      // Refresh collections list
-      const fetchedCollections = await getCollections();
-      setCollections(fetchedCollections);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCollection((prevCollection) => ({
-      ...prevCollection,
-      [name]: value,
-    }));
   };
 
   return (
     <div>
-      <h1>Collections</h1>
-
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="name"
-              label="Name"
-              fullWidth
-              value={collection.name}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="image"
-              label="Image URL"
-              fullWidth
-              value={collection.image}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Button type="submit" variant="contained" color="primary">
-              {collection.id ? 'Update Collection' : 'Create Collection'}
-            </Button>
-          </Grid>
-        </Grid>
+        <input
+          type="text"
+          id="name"
+          value={category.name}
+          onChange={(e) => setCategory({ ...category, name: e.target.value })}
+        />
+        <button type="submit">Add Category</button>
       </form>
-
-      <div>
-        <h2>All Collections</h2>
-        <ul>
-          {collections.map((col) => (
-            <li key={col.id}>
-              <div>Name: {col.name}</div>
-              <div>Image: {col.image}</div>
-              <div>
-                <Button variant="contained" color="secondary" onClick={() => handleDelete(col.id)}>
-                  Delete
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul>
+        {categories.map((category) => (
+          <div>
+            <li key={category.id}>{category.name}</li>
+            <button onClick={handleDelete(category.id)}>
+              Delete
+            </button>
+            <button onClick={handleEdit(category.id)}>
+              Edit
+            </button>
+          </div>
+        ))}
+      </ul>
     </div>
   );
-};
+}
 
-export default CollectionsPage;
+export default Categories;

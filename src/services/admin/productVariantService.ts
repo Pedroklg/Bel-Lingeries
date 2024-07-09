@@ -3,9 +3,9 @@ import { getAuthHeaders } from '@/utils/authHeaders';
 
 const BASE_URL = '/api/admin/productVariants';
 
-export const createProductVariant = async (formData: FormData) => {
+export const createProductVariant = async (data :  any) => {
   const headers = await getAuthHeaders();
-  const response = await axios.post(BASE_URL, formData, { headers });
+  const response = await axios.post(BASE_URL, data, { headers });
   return response.data;
 };
 
@@ -21,9 +21,9 @@ export const getProductVariants = async () => {
   return response.data;
 };
 
-export const updateProductVariant = async (variantId: number, formData: FormData) => {
+export const updateProductVariant = async (variantId: number, data: any) => {
   const headers = await getAuthHeaders();
-  const response = await axios.put(`${BASE_URL}/${variantId}`, formData, { headers });
+  const response = await axios.put(`${BASE_URL}/${variantId}`, data, { headers });
   return response.data;
 };
 

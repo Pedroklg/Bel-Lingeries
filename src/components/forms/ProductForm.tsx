@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, TextField, Select, MenuItem } from "@mui/material";
+import { Button, TextField, Select, MenuItem, Grid } from "@mui/material";
 import { Category, Collection } from "../../types/models";
 import { getCategories } from "@/services/admin/categoryService";
 import { getCollections } from "@/services/admin/collectionService";
@@ -7,8 +7,6 @@ import { SelectChangeEvent } from "@mui/material";
 import { createProduct } from "@/services/admin/productService";
 
 function ProductForm() {
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-    const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [formData, setFormData] = useState<{
@@ -32,8 +30,7 @@ function ProductForm() {
             try {
                 const response = await getCategories();
                 setCategories(response);
-            }
-            catch (error) {
+            } catch (error) {
                 console.error('Error fetching categories:', error);
             }
         };
@@ -42,8 +39,7 @@ function ProductForm() {
             try {
                 const response = await getCollections();
                 setCollections(response);
-            }
-            catch (error) {
+            } catch (error) {
                 console.error('Error fetching collections:', error);
             }
         };
@@ -60,14 +56,18 @@ function ProductForm() {
 
     const handleChangeCategory = (event: SelectChangeEvent<number>) => {
         const selectedCategoryId = event.target.value;
-        const category = categories.find(category => category.id === selectedCategoryId);
-        setSelectedCategory(category || null);
+        setFormData({
+            ...formData,
+            categoryId: selectedCategoryId.toString(),
+        });
     };
 
     const handleChangeCollection = (event: SelectChangeEvent<number>) => {
         const selectedCollectionId = event.target.value;
-        const collection = collections.find(collection => collection.id === selectedCollectionId);
-        setSelectedCollection(collection || null);
+        setFormData({
+            ...formData,
+            collectionId: selectedCollectionId.toString(),
+        });
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -76,14 +76,21 @@ function ProductForm() {
         formNewProduct.append('name', formData.name);
         formNewProduct.append('description', formData.description);
         formNewProduct.append('price', formData.price);
-        formNewProduct.append('categoryId', selectedCategory?.id.toString() || '');
-        formNewProduct.append('collectionId', selectedCollection?.id.toString() || '');
-        console.log(formNewProduct);
+        formNewProduct.append('categoryId', formData.categoryId);
+        formNewProduct.append('collectionId', formData.collectionId);
+
         try {
             const response = await createProduct(formData);
             console.log(response);
-        }
-        catch (error) {
+            setFormData({
+                name: '',
+                description: '',
+                price: '',
+                image: null,
+                categoryId: '',
+                collectionId: '',
+            });
+        } catch (error) {
             console.error('Error creating product:', error);
         }
     };
@@ -91,53 +98,78 @@ function ProductForm() {
     return (
         <div>
             <form onSubmit={handleSubmit}>
-                <TextField
-                    id="name"
-                    label="Product Name"
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <TextField
-                    id="description"
-                    label="Product Description"
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <TextField
-                    id="price"
-                    label="Product Price"
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <Select
-                    labelId="categoryId"
-                    id="categoryId"
-                    value={selectedCategory?.id || ''}
-                    label="Select Category"
-                    onChange={handleChangeCategory}
-                >
-                    {categories.map((category) => (
-                        <MenuItem key={category.id} value={category.id}>
-                            {category.name}
-                        </MenuItem>
-                    ))}
-                </Select>
-                <Select
-                    id="collectionId"
-                    value={selectedCollection?.id || ''}
-                    label="Select Collection"
-                    onChange={handleChangeCollection}
-                >
-                    {collections.map((collection) => (
-                        <MenuItem key={collection.id} value={collection.id}>
-                            {collection.name}
-                        </MenuItem>
-                    ))}
-                </Select>
-
-                <Button variant="contained" color="primary" type="submit">
-                    Criar Produto
-                </Button>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            id="name"
+                            label="Product Name"
+                            variant="outlined"
+                            value={formData.name}
+                            onChange={handleChange}
+                            sx={{ color: ''}}
+                            
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            id="description"
+                            label="Product Description"
+                            variant="outlined"
+                            value={formData.description}
+                            onChange={handleChange}
+                            sx={{ color: ''}}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            id="price"
+                            label="Product Price"
+                            variant="outlined"
+                            value={formData.price}
+                            onChange={handleChange}
+                            sx={{ color: ''}}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Select
+                            fullWidth
+                            labelId="categoryId"
+                            id="categoryId"
+                            value={Number(formData.categoryId) || ''}
+                            label="Select Category"
+                            onChange={handleChangeCategory}
+                        >
+                            {categories.map((category) => (
+                                <MenuItem key={category.id} value={category.id}>
+                                    {category.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Select
+                            fullWidth
+                            id="collectionId"
+                            value={Number(formData.collectionId) || ''}
+                            label="Select Collection"
+                            onChange={handleChangeCollection}
+                        >
+                            {collections.map((collection) => (
+                                <MenuItem key={collection.id} value={collection.id}>
+                                    {collection.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button fullWidth variant="contained" color="primary" type="submit">
+                            Criar Produto
+                        </Button>
+                    </Grid>
+                </Grid>
             </form>
         </div>
     );

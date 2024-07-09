@@ -6,16 +6,16 @@ import { Product, ProductVariant } from '../../types/models';
 
 const ProductVariantForm = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
-  const [formData, setFormData] = useState<{
+  const [variantData, setVariantData] = useState<{
     color: string;
     size: string;
     stock: string;
     frontImage: File | null;
     backImage: File | null;
     additionalImages: File[];
+    productId?: string;
+    variantID?: string;
   }>({
     color: '',
     size: '',
@@ -23,6 +23,8 @@ const ProductVariantForm = () => {
     frontImage: null,
     backImage: null,
     additionalImages: [],
+    productId: '',
+    variantID: '',
   });
 
   useEffect(() => {
@@ -51,28 +53,35 @@ const ProductVariantForm = () => {
 
   const handleProductChange = (event: SelectChangeEvent<number>, child: React.ReactNode) => {
     const productId = event.target.value;
-    const product = products.find(product => product.id === productId);
-    setSelectedProduct(product || null);
+    setVariantData(prevData => ({
+      ...prevData,
+      productId: productId.toString(),
+    }));
     fetchVariantsForProduct(productId.toString());
   };
 
   const handleVariantChange = (event: SelectChangeEvent<number>, child: React.ReactNode) => {
     const variantId = event.target.value;
-    const selected = variants.find(variant => variant.id === variantId);
-    setSelectedVariant(selected || null);
-    setFormData({
-      color: selected ? selected.color : '',
-      size: selected ? selected.size : '',
-      stock: selected ? selected.stock.toString() : '',
+    setVariantData(prevData => ({
+      ...prevData,
+      variantID: variantId.toString(),
+    }));
+    const selectedVariant = variants.find(variant => variant.id === variantId);
+    setVariantData({
+      color: selectedVariant?.color || '',
+      size: selectedVariant?.size || '',
+      stock: selectedVariant?.stock.toString() || '',
       frontImage: null,
       backImage: null,
       additionalImages: [],
+      productId: selectedVariant?.productId.toString() || '',
+      variantID: selectedVariant?.id.toString() || '',
     });
   };
 
-  const handleFormDataChange = (event: React.ChangeEvent<any>) => {
+  const handlevariantDataChange = (event: React.ChangeEvent<any>) => {
     const { name, value } = event.target;
-    setFormData(prevData => ({
+    setVariantData(prevData => ({
       ...prevData,
       [name]: value,
     }));
@@ -80,7 +89,7 @@ const ProductVariantForm = () => {
 
   const handleImageChange = (event: React.ChangeEvent<any>) => {
     const { name, files } = event.target;
-    setFormData(prevData => ({
+    setVariantData(prevData => ({
       ...prevData,
       [name]: files[0],
     }));
@@ -90,42 +99,25 @@ const ProductVariantForm = () => {
     event.preventDefault();
     try {
       let response;
-      if (selectedVariant) {
-        const formDataWithId = new FormData();
-        formDataWithId.append('updatedColor', formData.color);
-        formDataWithId.append('updatedSize', formData.size);
-        formDataWithId.append('updatedStock', formData.stock);
-        if (formData.frontImage) formDataWithId.append('frontImage', formData.frontImage);
-        if (formData.backImage) formDataWithId.append('backImage', formData.backImage);
-        for (let i = 0; i < formData.additionalImages.length; i++) {
-          formDataWithId.append('additionalImages', formData.additionalImages[i]);
-        }
-        response = await updateProductVariant(selectedVariant.id, formDataWithId);
+      if (variantData.variantID !== '') {
+        response = await updateProductVariant(Number(variantData.variantID), variantData);
+        console.log('Variant updated:', response);
       } else {
-        const formDataWithoutId = new FormData();
-        formDataWithoutId.append('color', formData.color);
-        formDataWithoutId.append('size', formData.size);
-        formDataWithoutId.append('stock', formData.stock);
-        formDataWithoutId.append('productId', selectedProduct?.id.toString() || '');
-        formDataWithoutId.append('frontImage', formData.frontImage || '');
-        formDataWithoutId.append('backImage', formData.backImage || '');
-        for (let i = 0; i < formData.additionalImages.length; i++) {
-          formDataWithoutId.append('additionalImages', formData.additionalImages[i]);
-        }
-        response = await createProductVariant(formDataWithoutId);
+        response = await createProductVariant(variantData);
       }
       console.log('Variant saved:', response);
-      setFormData({
+      setVariantData({
         color: '',
         size: '',
         stock: '',
         frontImage: null,
         backImage: null,
         additionalImages: [],
+        productId: '',
+        variantID: '',
       });
-      setSelectedVariant(null);
-      if (selectedProduct) {
-        fetchVariantsForProduct(selectedProduct.id.toString());
+      if (variantData.productId !== '') {
+        fetchVariantsForProduct(variantData.productId?.toString() || '')
       }
     } catch (error) {
       console.error('Error saving variant:', error);
@@ -139,7 +131,7 @@ const ProductVariantForm = () => {
         <Select
           labelId="product-select-label"
           id="product-select"
-          value={selectedProduct?.id || ''}
+          value={Number(variantData.productId) || ''}
           label="Select Product"
           onChange={handleProductChange}
         >
@@ -156,7 +148,7 @@ const ProductVariantForm = () => {
         <Select
           labelId="variant-select-label"
           id="variant-select"
-          value={selectedVariant ? selectedVariant.id : ''}
+          value={Number(variantData.variantID) || ''}
           label="Select Variant (Optional)"
           onChange={handleVariantChange}
         >
@@ -175,24 +167,24 @@ const ProductVariantForm = () => {
         <TextField
           name="color"
           label="Color"
-          value={formData.color}
-          onChange={handleFormDataChange}
+          value={variantData.color}
+          onChange={handlevariantDataChange}
           fullWidth
           required
         />
         <TextField
           name="size"
           label="Size"
-          value={formData.size}
-          onChange={handleFormDataChange}
+          value={variantData.size}
+          onChange={handlevariantDataChange}
           fullWidth
           required
         />
         <TextField
           name="stock"
           label="Stock"
-          value={formData.stock}
-          onChange={handleFormDataChange}
+          value={variantData.stock}
+          onChange={handlevariantDataChange}
           fullWidth
           type="number"
           required
@@ -206,8 +198,8 @@ const ProductVariantForm = () => {
             name="frontImage"
             onChange={handleImageChange}
           />
-          {formData.frontImage && (
-            <img src={URL.createObjectURL(formData.frontImage)} alt="Main" width={200} height={200} />
+          {variantData.frontImage && (
+            <img src={URL.createObjectURL(variantData.frontImage)} alt="Main" width={200} height={200} />
           )}
         </div>
         <div>
@@ -218,8 +210,8 @@ const ProductVariantForm = () => {
             name="backImage"
             onChange={handleImageChange}
           />
-          {formData.backImage && (
-            <img src={URL.createObjectURL(formData.backImage)} alt="Main" width={200} height={200} />
+          {variantData.backImage && (
+            <img src={URL.createObjectURL(variantData.backImage)} alt="Main" width={200} height={200} />
           )}
         </div>
 
@@ -233,22 +225,22 @@ const ProductVariantForm = () => {
                 onChange={(e) => {
                   const files = e.target.files;
                   if (files) {
-                    setFormData(prevData => ({
+                    setVariantData(prevData => ({
                       ...prevData,
                       additionalImages: [...prevData.additionalImages, files[0]],
                     }));
                   }
                 }}
               />
-              {formData.additionalImages[index] && (
-                <img src={URL.createObjectURL(formData.additionalImages[index])} alt={`Image ${index + 1}`} width={200} height={200} />
+              {variantData.additionalImages[index] && (
+                <img src={URL.createObjectURL(variantData.additionalImages[index])} alt={`Image ${index + 1}`} width={200} height={200} />
               )}
             </div>
           ))}
         </div>
 
         <Button variant="contained" color="primary" type="submit">
-          {selectedVariant ? 'Update Variant' : 'Create Variant'}
+          {variantData.productId !== '' ? 'Update Variant' : 'Create Variant'}
         </Button>
       </form>
     </div>

@@ -17,6 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         break;
       case 'POST':
         const { name, description, price, collectionId, categoryId } = req.body;
+        console.log(req.body);
 
         const newProduct = await prisma.product.create({
           data: {

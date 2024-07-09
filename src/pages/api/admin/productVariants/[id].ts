@@ -1,21 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import multer from 'multer';
 import prisma from '../../../../lib/prisma';
 import authMiddleware from '../../../../middleware/authMiddleware';
 import { deleteImageFromCloudinary, processAndStoreImage } from '../../../../utils/imageProcessing';
 
-const upload = multer({
-  storage: multer.memoryStorage(), // Store files in memory
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
-});
-
-upload.fields([
-  { name: 'frontImage', maxCount: 1 },
-  { name: 'backImage', maxCount: 1 },
-  { name: 'additionalImages', maxCount: 9 },
-]);
-
-const handler = async (req: NextApiRequest & { files?: any }, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
 
   switch (req.method) {
@@ -37,14 +25,8 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
       }
 
     case 'PUT':
-    try {
-      const updatedColor = req.body['updatedColor'];
-      const updatedSize = req.body['updatedSize'];
-      const updatedStock = req.body['updatedStock'];
-  
-      console.log('req.body:', req.body); // Debug log to check req.body contents
-      console.log(req.body.updatedColor, req.body.updatedSize, req.body.updatedStock); // Debug log to check req.body contents
-      console.log(updatedColor, updatedSize, updatedStock); // Debug log to check updated values
+      try {
+        const { color: updatedColor, size: updatedSize, stock: updatedStock } = req.body;
 
         const currentProductVariant = await prisma.productVariant.findUnique({
           where: { id: Number(id) },
@@ -60,9 +42,8 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         const updatedAdditionalImagesUrls = [];
         let deletedImages = [];
 
-        // Process and store updated front image if provided
-        if (req.files?.frontImage) {
-          updatedFrontImageUrl = await processAndStoreImage(req.files.frontImage[0].buffer, 'product_variants');
+        if (req.body?.frontImage && Array.isArray(req.body.frontImage) && req.body.frontImage.length > 0 && req.body.frontImage[0]?.buffer) {
+          updatedFrontImageUrl = await processAndStoreImage(req.body.frontImage[0].buffer, 'product_variants');
           // Delete previous front image from Cloudinary
           if (currentProductVariant.frontImage) {
             await deleteImageFromCloudinary(currentProductVariant.frontImage);
@@ -70,8 +51,8 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         }
 
         // Process and store updated back image if provided
-        if (req.files?.backImage) {
-          updatedBackImageUrl = await processAndStoreImage(req.files.backImage[0].buffer, 'product_variants');
+        if (req.body?.backImage && Array.isArray(req.body.backImage) && req.body.backImage.length > 0 && req.body.backImage[0]?.buffer) {
+          updatedBackImageUrl = await processAndStoreImage(req.body.backImage[0].buffer, 'product_variants');
           // Delete previous back image from Cloudinary
           if (currentProductVariant.backImage) {
             await deleteImageFromCloudinary(currentProductVariant.backImage);
@@ -79,8 +60,8 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
         }
 
         // Process and store updated additional images if provided
-        if (req.files?.additionalImages) {
-          for (const file of req.files.additionalImages) {
+        if (req.body?.additionalImages) {
+          for (const file of req.body.additionalImages) {
             const url = await processAndStoreImage(file.buffer, 'product_variants');
             updatedAdditionalImagesUrls.push(url);
           }
