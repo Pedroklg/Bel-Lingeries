@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Collection } from '@prisma/client';
 import { Grid, Button, TextField } from '@mui/material';
 import { createCollection, getCollections, updateCollection, deleteCollection } from '@/services/admin/collectionService';
+import ReusableTable from '@/components/ReusableTable';
+import AdminLayout from '@/layouts/AdminLayout';
+
+const columns = [
+  { id: 'id', label: 'ID' },
+  { id: 'name', label: 'Name' },
+  { id: 'image', label: 'Image' },
+];
 
 const CollectionsPage: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -36,7 +44,7 @@ const CollectionsPage: React.FC = () => {
       const fetchedCollections = await getCollections();
       setCollections(fetchedCollections);
       // Reset form
-      setCollection({id: 0, name: '', image: '' });
+      setCollection({ id: 0, name: '', image: '' });
     } catch (error) {
       console.error('Error:', error);
     }
@@ -62,7 +70,7 @@ const CollectionsPage: React.FC = () => {
   };
 
   return (
-    <div>
+    <AdminLayout>
       <h1>Collections</h1>
 
       <form onSubmit={handleSubmit}>
@@ -77,13 +85,13 @@ const CollectionsPage: React.FC = () => {
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
+            <input 
+              type="file"
               name="image"
-              label="Image URL"
-              fullWidth
-              value={collection.image}
+              id='image'
+              accept="image/*"
               onChange={handleChange}
-            />
+             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <Button type="submit" variant="contained" color="primary">
@@ -95,21 +103,9 @@ const CollectionsPage: React.FC = () => {
 
       <div>
         <h2>All Collections</h2>
-        <ul>
-          {collections.map((col) => (
-            <li key={col.id}>
-              <div>Name: {col.name}</div>
-              <div>Image: {col.image}</div>
-              <div>
-                <Button variant="contained" color="secondary" onClick={() => handleDelete(col.id)}>
-                  Delete
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <ReusableTable columns={columns} data={collections} />
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

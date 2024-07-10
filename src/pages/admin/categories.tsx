@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import { Category } from "@/types/models";
 import { fetchAllCategories } from "@/services/categoryService";
 import { deleteCategory, updateCategory, createCategory } from "@/services/admin/categoryService";
-import { set } from "react-hook-form";
+import ReusableTable from "@/components/ReusableTable";
+import AdminLayout from "@/layouts/AdminLayout";
+
+const columns = [
+  { id: "id", label: "ID" },
+  { id: "name", label: "Name" },
+];
 
 function Categories() {
   const [category, setCategory] = useState<Category>({ id: 0, name: "", products: [] });
@@ -17,11 +23,11 @@ function Categories() {
     };
 
     fetchCategories();
-
   }, []);
 
-  const addCategory = () => {
-    createCategory(category);
+  const addCategory = async () => {
+    const newCategory = await createCategory(category);
+    setCategories([...categories, newCategory]);
   };
 
   const handleEdit = (id: number) => () => {
@@ -37,46 +43,35 @@ function Categories() {
     setCategories(categories.filter((c) => c.id !== id));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
       if (isEditing) {
-        updateCategory(category.id, category);
+        await updateCategory(category.id, category);
+        setCategories(categories.map((c) => (c.id === category.id ? category : c)));
       } else {
-        addCategory();
+        await addCategory();
       }
-      console.log("Category added");
       setCategory({ id: 0, name: "", products: [] });
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          id="name"
-          value={category.name}
-          onChange={(e) => setCategory({ ...category, name: e.target.value })}
-        />
-        <button type="submit">Add Category</button>
-      </form>
-      <ul>
-        {categories.map((category) => (
-          <div>
-            <li key={category.id}>{category.name}</li>
-            <button onClick={handleDelete(category.id)}>
-              Delete
-            </button>
-            <button onClick={handleEdit(category.id)}>
-              Edit
-            </button>
-          </div>
-        ))}
-      </ul>
-    </div>
+    <AdminLayout>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            id="name"
+            value={category.name}
+            onChange={(e) => setCategory({ ...category, name: e.target.value })}
+          />
+          <button type="submit">{isEditing ? "Update Category" : "Add Category"}</button>
+        </form>
+        <ReusableTable columns={columns} data={categories} />
+    </AdminLayout>
   );
 }
 
