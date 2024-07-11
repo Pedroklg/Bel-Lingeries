@@ -39,7 +39,9 @@ yarn install
   ```plaintext
   DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
   SESSION_SECRET="your_session_secret"
-  STRIPE_SECRET_KEY="your_stripe_secret_key"
+  CLOUDINARY_CLOUD_NAME="your_cloud_name"
+  CLOUDINARY_API_KEY="your_cloudnirary_api_key"
+  CLOUDINARY_API_SECRET="your_cloudnary_api_sercret"
   ```
 
 ### Database Setup
