@@ -30,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     
     const token = createToken(user.id, user.isAdmin);
     console.log('Token created:', token);
-    res.status(200).json({ token }); // Return token once
+    res.status(200).json({ token }); 
 
   } catch (error) {
     console.error('Error authenticating user:', error);
