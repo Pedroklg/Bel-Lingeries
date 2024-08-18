@@ -12,30 +12,28 @@ import { palette } from '@/theme';
 const { belDarkCyan, belBlue } = palette;
 
 const ProductsPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]); // State for all products
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]); // State for filtered products
-  const [loading, setLoading] = useState(true); // Loading state
-  const [sortOption, setSortOption] = useState<string>('newest'); // State for sorting option
-  const router = useRouter(); // Next.js router instance
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState<string>('newest');
+  const router = useRouter(); 
 
   useEffect(() => {
-    // Function to fetch all products on component mount
     const loadProducts = async () => {
       try {
         const fetchedProducts = await fetchAllProducts();
         setProducts(fetchedProducts);
-        setFilteredProducts(fetchedProducts); // Initialize filtered products with all products
-        setLoading(false); // Set loading to false after products are fetched
+        setFilteredProducts(fetchedProducts);  
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
-        setLoading(false); // Ensure loading state is updated even in case of errors
+        setLoading(false);
       }
     };
-    loadProducts(); // Call the loadProducts function on component mount
-  }, []); // Empty dependency array means this effect runs only once on mount
+    loadProducts();
+  }, []);
 
   useEffect(() => {
-    // Function to apply filters from query parameters
     const applyFiltersFromQueryParams = () => {
       const queryParams = router.query;
       const filters: any = {};
@@ -53,16 +51,15 @@ const ProductsPage: React.FC = () => {
         filters.priceRange = [Number(queryParams.minPrice), Number(queryParams.maxPrice)];
       }
 
-      applyFilters(filters); // Call applyFilters with extracted filters
+      applyFilters(filters);
     };
 
-    applyFiltersFromQueryParams(); // Call this function whenever router.query changes
-  }, [router.query]); // Depend on router.query for changes
+    applyFiltersFromQueryParams();
+  }, [router.query]);
 
   const applySort = () => {
-    let sortedProducts = [...filteredProducts]; // Copy filtered products array
+    let sortedProducts = [...filteredProducts];
 
-    // Sorting logic based on selected sortOption
     if (sortOption === 'newest') {
       sortedProducts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else if (sortOption === 'mostSold') {
@@ -73,7 +70,7 @@ const ProductsPage: React.FC = () => {
       sortedProducts.sort((a, b) => b.price - a.price);
     }
 
-    setFilteredProducts(sortedProducts); // Update filteredProducts state with sorted array
+    setFilteredProducts(sortedProducts);
   };
 
   const handleSortChange = (option: string) => {
@@ -84,9 +81,8 @@ const ProductsPage: React.FC = () => {
   const applyFilters = (filters: any) => {
     const { search, category, collection, priceRange } = filters;
 
-    let filtered = [...products]; // Make a copy to avoid mutating state directly
+    let filtered = [...products];
 
-    // Filter logic based on applied filters
     if (search) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(search.toLowerCase())
@@ -106,7 +102,7 @@ const ProductsPage: React.FC = () => {
       filtered = filtered.filter(product => product.price >= min && product.price <= max);
     }
 
-    setFilteredProducts(filtered); // Update filteredProducts state with filtered array
+    setFilteredProducts(filtered);
   };
 
   const handleFilterChange = (filters: any) => {
