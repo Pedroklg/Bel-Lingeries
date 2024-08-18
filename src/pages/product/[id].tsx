@@ -16,7 +16,7 @@ const ProductPage = () => {
   const [availableSizes, setAvailableSizes] = useState<ProductSize[]>([]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
-  const { addToCart } = useCart(); // Access addToCart function from CartContext
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const getProduct = async () => {
@@ -24,7 +24,6 @@ const ProductPage = () => {
         const productData = await fetchProductById(Number(id));
         setProduct(productData);
 
-        // Set initial color and sizes
         if (productData && productData.variants.length > 0) {
           const initialColor = productData.variants[0] as APIProductVariant;
           setSelectedColor({
@@ -33,12 +32,12 @@ const ProductPage = () => {
             backImage: initialColor.backImage,
             additionalImages: initialColor.additionalImages.map((image: APIAdditionalImage) => image.imageUrl),
           });
-          setSelectedImage(initialColor.frontImage); // Set initial big image
+          setSelectedImage(initialColor.frontImage);
           setAvailableSizes(productData.variants.map(variant => ({
             size: variant.size,
             stock: variant.stock,
           })));
-          setSelectedSize(initialColor.size); // Set initial size
+          setSelectedSize(initialColor.size);
         }
       }
     };
@@ -49,17 +48,17 @@ const ProductPage = () => {
     setSelectedColor(color);
     const variant = product?.variants.find(variant => variant.color === color.color);
     if (variant) {
-      setSelectedImage(variant.frontImage); // Update big image when color changes
+      setSelectedImage(variant.frontImage);
       setAvailableSizes([{
         size: variant.size,
         stock: variant.stock,
       }]);
-      setSelectedSize(variant.size); // Update size when color changes
+      setSelectedSize(variant.size);
     }
   };
 
   const handleThumbnailClick = (image: string) => {
-    setSelectedImage(image); // Update big image on thumbnail click
+    setSelectedImage(image);
   };
 
   const handleSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -72,14 +71,13 @@ const ProductPage = () => {
         variant.color === selectedColor.color && variant.size === selectedSize
       );
       if (selectedVariant) {
-        addToCart(product, selectedVariant, 1); // Assuming quantity is 1 for simplicity
+        addToCart(product, selectedVariant, 1);
       }
     }
   };
 
   if (!product) return <div>Loading...</div>;
 
-  // Gather all images from all variants
   let allImages: string[] = [];
   product.variants.forEach(variant => {
     allImages.push(variant.frontImage);
@@ -90,7 +88,6 @@ const ProductPage = () => {
   return (
     <MainLayout>
       <Grid container spacing={2}>
-        {/* Main Image and Thumbnails Column */}
         <Grid item xs={12} sm={8} md={9}>
           <Box my={4} sx={{ width: "100%", height: "600px", position: 'relative' }}>
             <Swiper
@@ -100,7 +97,6 @@ const ProductPage = () => {
               loop={true}
               className="mySwiper"
               onSwiper={(swiper) => {
-                // Update selected image when swiper active index changes
                 setSelectedImage(allImages[swiper.activeIndex]);
               }}
             >
@@ -114,7 +110,6 @@ const ProductPage = () => {
         </Grid>
 
         <Grid item xs={12} sm={4} md={3}>
-          {/* Thumbnails */}
           <Box mt={4} sx={{ maxHeight: "600px", overflowY: "auto" }}>
             <Swiper
               direction="vertical"
@@ -139,7 +134,6 @@ const ProductPage = () => {
           </Box>
         </Grid>
 
-        {/* Product Details */}
         <Grid item xs={12} sm={8} md={9}>
           <Box p={2}>
             <Typography variant="h3" gutterBottom>
