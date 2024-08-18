@@ -44,29 +44,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         if (req.body?.frontImage && Array.isArray(req.body.frontImage) && req.body.frontImage.length > 0 && req.body.frontImage[0]?.buffer) {
           updatedFrontImageUrl = await processAndStoreImage(req.body.frontImage[0].buffer, 'product_variants');
-          // Delete previous front image from Cloudinary
           if (currentProductVariant.frontImage) {
             await deleteImageFromCloudinary(currentProductVariant.frontImage);
           }
         }
 
-        // Process and store updated back image if provided
         if (req.body?.backImage && Array.isArray(req.body.backImage) && req.body.backImage.length > 0 && req.body.backImage[0]?.buffer) {
           updatedBackImageUrl = await processAndStoreImage(req.body.backImage[0].buffer, 'product_variants');
-          // Delete previous back image from Cloudinary
           if (currentProductVariant.backImage) {
             await deleteImageFromCloudinary(currentProductVariant.backImage);
           }
         }
 
-        // Process and store updated additional images if provided
         if (req.body?.additionalImages) {
           for (const file of req.body.additionalImages) {
             const url = await processAndStoreImage(file.buffer, 'product_variants');
             updatedAdditionalImagesUrls.push(url);
           }
 
-          // Delete previous additional images from Cloudinary
           for (const image of currentProductVariant.additionalImages) {
             if (image.imageUrl && !updatedAdditionalImagesUrls.includes(image.imageUrl)) {
               deletedImages.push(image.imageUrl);
@@ -75,7 +70,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
         }
 
-        // Update the product variant in the database
         const updatedProductVariant = await prisma.productVariant.update({
           where: { id: Number(id) },
           data: {
@@ -85,8 +79,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             frontImage: updatedFrontImageUrl || '',
             backImage: updatedBackImageUrl || '',
             additionalImages: {
-              create: updatedAdditionalImagesUrls.map(url => ({ imageUrl: url })), // Add new additional images
-              deleteMany: deletedImages.map(url => ({ imageUrl: url })), // Delete old additional images
+              create: updatedAdditionalImagesUrls.map(url => ({ imageUrl: url })), 
+              deleteMany: deletedImages.map(url => ({ imageUrl: url })), 
             },
           },
           include: {
@@ -94,7 +88,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
-        console.log('Variant saved:', updatedProductVariant); // Debug log for confirmation
+        console.log('Variant saved:', updatedProductVariant);
 
         return res.status(200).json(updatedProductVariant);
       } catch (error) {
@@ -107,4 +101,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default authMiddleware(handler, true); // true if admin access is required
+export default authMiddleware(handler, true);
