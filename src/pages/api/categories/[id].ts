@@ -6,13 +6,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const parsedId = parseInt(id as string);
 
     try {
-        // Verify if the categoryId is valid
         const validCategoryIds = [1, 2, 3, 4];
         if (!validCategoryIds.includes(parsedId)) {
             return res.status(404).json({ error: `Category with ID ${parsedId} not found` });
         }
 
-        // Fetch products from the database using Prisma
         const products = await prisma.product.findMany({
             where: {
                 categoryId: parsedId,
