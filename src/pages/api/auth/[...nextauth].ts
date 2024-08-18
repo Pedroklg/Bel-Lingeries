@@ -58,8 +58,8 @@ export const authOptions = {
           isAdmin: token.isAdmin,
           accessToken: token.accessToken as string,
         };
-        const expiresIn = Math.floor(Date.now() / 1000) + (60 * 60); // Unix timestamp for 1 hour from now
-        session.expires = new Date(expiresIn * 1000).toISOString(); // Convert Unix timestamp to ISO string
+        const expiresIn = Math.floor(Date.now() / 1000) + (60 * 60);
+        session.expires = new Date(expiresIn * 1000).toISOString();
       }
       return session;
     }
