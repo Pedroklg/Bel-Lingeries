@@ -4,7 +4,6 @@ import prisma from '@/lib/prisma';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      // Route to get all products
       if (req.query.type === 'all') {
         const products = await prisma.product.findMany({
           include: {
@@ -18,7 +17,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         return res.status(200).json(products);
       }
-      // Route to get newest products
       else if (req.query.type === 'newest') {
         const limit = Number(req.query.limit) || 5;
         const products = await prisma.product.findMany({
@@ -70,7 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
         return res.status(200).json(product);
       }
-      // Method not allowed for other queries on GET
       else {
         return res.setHeader('Allow', ['GET']).status(405).end(`Method ${req.method} Not Allowed`);
       }
