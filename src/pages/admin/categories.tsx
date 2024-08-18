@@ -16,7 +16,6 @@ function Categories() {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    // Get categories from the server
     const fetchCategories = async () => {
       const categories = await fetchAllCategories();
       setCategories(categories);
