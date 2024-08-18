@@ -40,10 +40,8 @@ const CollectionsPage: React.FC = () => {
       } else {
         await createCollection(collection);
       }
-      // Refresh collections list
       const fetchedCollections = await getCollections();
       setCollections(fetchedCollections);
-      // Reset form
       setCollection({ id: 0, name: '', image: '' });
     } catch (error) {
       console.error('Error:', error);
@@ -53,7 +51,6 @@ const CollectionsPage: React.FC = () => {
   const handleDelete = async (collectionId: number) => {
     try {
       await deleteCollection(collectionId);
-      // Refresh collections list
       const fetchedCollections = await getCollections();
       setCollections(fetchedCollections);
     } catch (error) {
