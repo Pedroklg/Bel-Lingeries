@@ -4,7 +4,6 @@ import prisma from '../../../lib/prisma';
 import authMiddleware from '../../../middleware/authMiddleware';
 import { processAndStoreImage } from '../../../utils/imageProcessing';
 
-// Configuração do Multer para armazenamento em memória e limite de tamanho de arquivo
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const handler = async (req: NextApiRequest & { files?: any }, res: NextApiResponse) => {
@@ -86,7 +85,6 @@ const handler = async (req: NextApiRequest & { files?: any }, res: NextApiRespon
   }
 };
 
-// Função customizada para integrar o Multer com o Next.js
 const customHandler = (req: any, res: any) => {
   upload.fields([
     { name: 'frontImage', maxCount: 1 },
